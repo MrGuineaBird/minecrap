@@ -95,23 +95,66 @@ const COLOR_KEY = {
 
 const ATLAS_TILE = 16;
 const ATLAS_COLS = 8;
-const TILE_KEYS = Object.keys(PACKS.classic);
+const EXTRA_TILE_KEYS = ["grasstop", "grassside", "logside", "logtopandbottom"];
+const TILE_KEYS = [...new Set([...Object.keys(PACKS.classic), ...EXTRA_TILE_KEYS])];
 const TILE_INDEX = new Map(TILE_KEYS.map((k, i) => [k, i]));
+const FILE_PROTOCOL = typeof window !== "undefined" && window.location?.protocol === "file:";
+const GRASS_TEXTURE_VERSION = Date.now();
+const CUSTOM_TILE_TEXTURE_FILES = {
+  grasstop: ["grasstop.png"],
+  grassside: ["grassside.png"],
+  dirt: ["dirt.png"],
+  stone: ["stone.png"],
+  sand: ["sand.png"],
+  snow: ["snow.png"],
+  logside: ["logside.png"],
+  logtopandbottom: ["logtopandbottom.png"],
+  leaf: ["leaves.png", "leaf.png"],
+};
+const CUSTOM_TILE_TEXTURE_KEYS = Object.keys(CUSTOM_TILE_TEXTURE_FILES);
+const GRASS_TEXTURE_ROOTS = [
+  "./textures",
+  "/textures",
+  "./src/textures",
+  "/src/textures",
+  "./assets/textures",
+  "/assets/textures",
+];
+
+function textureUrlsForKey(key) {
+  const files = CUSTOM_TILE_TEXTURE_FILES[key];
+  if (!files?.length) return [];
+  const out = [];
+  for (const root of GRASS_TEXTURE_ROOTS) {
+    for (const file of files) {
+      out.push(`${root}/${file}`);
+      if (file.toLowerCase().endsWith(".png")) out.push(`${root}/${file.slice(0, -4)}.PNG`);
+    }
+  }
+  return [...new Set(out)];
+}
+
+function tileColorKey(key) {
+  if (key === "grasstop" || key === "grassside") return "grass";
+  if (key === "logside" || key === "logtopandbottom") return "log";
+  return key;
+}
 
 function hexRGB(hex) {
   return { r: (hex >> 16) & 255, g: (hex >> 8) & 255, b: hex & 255 };
 }
 
 function tileShade(key, x, y, seed) {
+  const k = key === "grasstop" || key === "grassside" ? "grass" : (key === "logside" || key === "logtopandbottom" ? "log" : key);
   let shade = 0.9 + (r01(x, y, 0, seed) - 0.5) * 0.24;
-  if (key === "log" && x % 4 < 2) shade *= 0.73;
-  if (key === "plank" && y % 4 === 0) shade *= 0.84;
-  if (key === "water") shade = 0.78 + Math.sin((x + y) * 0.65) * 0.07 + (r01(x, y, 1, seed) - 0.5) * 0.1;
-  if (key === "lava") shade = 0.86 + Math.sin((x * 0.8 + y * 0.6) + (seed & 7)) * 0.12;
-  if (key === "glass") shade = 0.9 + (x % 5 === 0 || y % 5 === 0 ? 0.07 : 0);
-  if (key === "leaf") shade *= 0.92 + (x + y) % 3 * 0.04;
-  if (key === "farm" && y % 3 === 0) shade *= 0.8;
-  if (key === "rail") shade = x % 4 < 2 ? 0.96 : 0.72;
+  if (k === "log" && x % 4 < 2) shade *= 0.73;
+  if (k === "plank" && y % 4 === 0) shade *= 0.84;
+  if (k === "water") shade = 0.78 + Math.sin((x + y) * 0.65) * 0.07 + (r01(x, y, 1, seed) - 0.5) * 0.1;
+  if (k === "lava") shade = 0.86 + Math.sin((x * 0.8 + y * 0.6) + (seed & 7)) * 0.12;
+  if (k === "glass") shade = 0.9 + (x % 5 === 0 || y % 5 === 0 ? 0.07 : 0);
+  if (k === "leaf") shade *= 0.92 + (x + y) % 3 * 0.04;
+  if (k === "farm" && y % 3 === 0) shade *= 0.8;
+  if (k === "rail") shade = x % 4 < 2 ? 0.96 : 0.72;
   return shade;
 }
 
@@ -145,7 +188,7 @@ function drawTile(ctx, tx, ty, key, hex, pack) {
   if (key === "coal") drawDots(ctx, tx, ty, key, 14, "#1e1f22", seed);
   if (key === "iron") drawDots(ctx, tx, ty, key, 12, "#d9a27e", seed);
   if (key === "gold") drawDots(ctx, tx, ty, key, 12, "#ffd154", seed);
-  if (key === "grass") {
+  if (key === "grass" || key === "grassside") {
     ctx.fillStyle = "rgba(40,110,35,0.25)";
     for (let x = 1; x < ATLAS_TILE; x += 3) ctx.fillRect(tx + x, ty + 2, 1, ATLAS_TILE - 4);
   }
@@ -155,21 +198,8 @@ function drawTile(ctx, tx, ty, key, hex, pack) {
   }
 }
 
-function buildAtlas(packName) {
-  const pack = PACKS[packName] || PACKS.classic;
-  const rows = Math.ceil(TILE_KEYS.length / ATLAS_COLS);
-  const canvas = document.createElement("canvas");
-  canvas.width = ATLAS_COLS * ATLAS_TILE;
-  canvas.height = rows * ATLAS_TILE;
-  const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingEnabled = false;
-
-  TILE_KEYS.forEach((key, i) => {
-    const x = (i % ATLAS_COLS) * ATLAS_TILE;
-    const y = Math.floor(i / ATLAS_COLS) * ATLAS_TILE;
-    drawTile(ctx, x, y, key, pack[key] ?? 0xffffff, packName);
-  });
-
+function atlasFromCanvas(canvas) {
+  const rows = Math.ceil(canvas.height / ATLAS_TILE);
   const texture = new THREE.CanvasTexture(canvas);
   texture.magFilter = THREE.NearestFilter;
   texture.minFilter = THREE.NearestFilter;
@@ -177,7 +207,6 @@ function buildAtlas(packName) {
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   texture.needsUpdate = true;
-
   return {
     texture,
     uvFor(key) {
@@ -192,6 +221,58 @@ function buildAtlas(packName) {
       return { u0, u1, v0, v1 };
     },
   };
+}
+
+function buildAtlas(packName) {
+  const pack = PACKS[packName] || PACKS.classic;
+  const rows = Math.ceil(TILE_KEYS.length / ATLAS_COLS);
+  const canvas = document.createElement("canvas");
+  canvas.width = ATLAS_COLS * ATLAS_TILE;
+  canvas.height = rows * ATLAS_TILE;
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+
+  TILE_KEYS.forEach((key, i) => {
+    const x = (i % ATLAS_COLS) * ATLAS_TILE;
+    const y = Math.floor(i / ATLAS_COLS) * ATLAS_TILE;
+    const cKey = tileColorKey(key);
+    drawTile(ctx, x, y, key, pack[cKey] ?? 0xffffff, packName);
+  });
+
+  return atlasFromCanvas(canvas);
+}
+
+function loadImageMaybe(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    const sep = url.includes("?") ? "&" : "?";
+    img.src = FILE_PROTOCOL ? url : `${url}${sep}v=${GRASS_TEXTURE_VERSION}`;
+  });
+}
+
+async function loadImageFromUrls(urls) {
+  for (const url of urls) {
+    const img = await loadImageMaybe(url);
+    if (img) return { img, url };
+  }
+  return { img: null, url: null };
+}
+
+function drawAtlasTileImage(atlas, key, img) {
+  const idx = TILE_INDEX.get(key);
+  const canvas = atlas?.texture?.image;
+  const ctx = canvas?.getContext?.("2d");
+  if (idx === undefined || !ctx || !img) return false;
+  ctx.imageSmoothingEnabled = false;
+  const x = (idx % ATLAS_COLS) * ATLAS_TILE;
+  const y = Math.floor(idx / ATLAS_COLS) * ATLAS_TILE;
+  ctx.clearRect(x, y, ATLAS_TILE, ATLAS_TILE);
+  ctx.drawImage(img, 0, 0, img.width, img.height, x, y, ATLAS_TILE, ATLAS_TILE);
+  atlas.texture.needsUpdate = true;
+  return true;
 }
 
 const ITEM = {
@@ -271,17 +352,60 @@ class World {
     this.fluidLimit = 220;
     this.decayLimit = 100;
     this.fireLimit = 100;
-    this.atlas = buildAtlas(this.pack);
+    this.grassTexReq = 0;
+    this.grassTexWarned = 0;
+    this.atlas = buildAtlas(PACKS[this.pack] ? this.pack : "classic");
+    this.applyGrassTextures();
   }
   ck(cx, cz) { return `${cx},${cz}`; }
   bk(x, y, z) { return `${x},${y},${z}`; }
   cc(x, z) { return [Math.floor(x / CHUNK), Math.floor(z / CHUNK)]; }
   lc(v) { return ((v % CHUNK) + CHUNK) % CHUNK; }
   idx(lx, y, lz) { return lx + CHUNK * (lz + CHUNK * y); }
+  applyGrassTextures() {
+    if (FILE_PROTOCOL) {
+      if (!this.grassTexWarned) {
+        console.warn("[WebCraft] Custom block textures require http(s) hosting. file:// taints canvas for WebGL. Run a local server (for example: `python -m http.server 8080`) and open http://localhost:8080/");
+        this.grassTexWarned = 1;
+      }
+      return;
+    }
+    const req = ++this.grassTexReq;
+    const atlas = this.atlas;
+    Promise.all(CUSTOM_TILE_TEXTURE_KEYS.map((k) => loadImageFromUrls(textureUrlsForKey(k)))).then((results) => {
+      if (req !== this.grassTexReq || atlas !== this.atlas) return;
+      let changed = false;
+      const loaded = {};
+      for (let i = 0; i < CUSTOM_TILE_TEXTURE_KEYS.length; i++) {
+        const key = CUSTOM_TILE_TEXTURE_KEYS[i];
+        const res = results[i];
+        loaded[key] = res.url;
+        if (res.img) changed = drawAtlasTileImage(atlas, key, res.img) || changed;
+      }
+      const missing = CUSTOM_TILE_TEXTURE_KEYS.filter((_, i) => !results[i].img);
+      if (missing.length) {
+        if (!this.grassTexWarned) {
+          const tried = Object.fromEntries(missing.map((key) => [key, textureUrlsForKey(key)]));
+          console.warn("[WebCraft] Some custom block textures were not found. Using generated fallback for missing keys.", {
+            loaded,
+            missing,
+            tried,
+          });
+          this.grassTexWarned = 1;
+        }
+      } else {
+        this.grassTexWarned = 0;
+        console.info("[WebCraft] Custom block textures loaded.", { loaded });
+      }
+      if (changed) atlas.texture.needsUpdate = true;
+      // Ensure visible update even on drivers/caches that don't refresh atlas-bound materials immediately.
+      if (changed) for (const k of this.loaded) this.rebuildKey(k);
+    });
+  }
   setPack(p) {
-    this.pack = PACKS[p] ? p : "classic";
-    if (this.atlas?.texture) this.atlas.texture.dispose();
-    this.atlas = buildAtlas(this.pack);
+    this.pack = (typeof p === "string" && p.trim()) ? p.trim() : "classic";
+    this.atlas = buildAtlas(PACKS[this.pack] ? this.pack : "classic");
+    this.applyGrassTextures();
     for (const k of this.loaded) this.rebuildKey(k);
   }
   setRD(v) { this.rd = clamp(Math.round(v), 2, MAX_RD); }
@@ -501,10 +625,13 @@ class World {
       const id = c.b[this.idx(lx, y, lz)]; if (id === BLOCK.AIR) continue;
       const d = DEF[id] || DEF[BLOCK.AIR], w = d.trans || d.liquid || d.plant || d.rail || id === BLOCK.TORCH || id === BLOCK.RED;
       const b = w ? t : o;
-      const x = bx + lx, z = bz + lz, key = COLOR_KEY[id] || "stone", col = new THREE.Color(pal[key] || 0xffffff);
-      const uv = this.atlas.uvFor(key);
-      const uvTri = [[uv.u0, uv.v0], [uv.u0, uv.v1], [uv.u1, uv.v1], [uv.u0, uv.v0], [uv.u1, uv.v1], [uv.u1, uv.v0]];
+      const x = bx + lx, z = bz + lz, key = COLOR_KEY[id] || "stone";
+      const noTint = id === BLOCK.GRASS || id === BLOCK.DIRT || id === BLOCK.STONE || id === BLOCK.SAND || id === BLOCK.SNOW || id === BLOCK.LOG || id === BLOCK.LEAF;
+      const baseHex = noTint ? 0xffffff : (pal[key] || 0xffffff);
+      const col = new THREE.Color(baseHex);
       if (d.plant || d.rail || id === BLOCK.TORCH || id === BLOCK.RED) {
+        const uv = this.atlas.uvFor(key);
+        const uvTri = [[uv.u0, uv.v0], [uv.u0, uv.v1], [uv.u1, uv.v1], [uv.u0, uv.v0], [uv.u1, uv.v1], [uv.u1, uv.v0]];
         const planes = [[[0, 0, 0], [1, 1, 1], [1, 0, 1], [0, 1, 0]], [[1, 0, 0], [0, 1, 1], [0, 0, 1], [1, 1, 0]]];
         for (const p of planes) {
           const verts = [p[0], p[1], p[2], p[0], p[3], p[1]];
@@ -520,6 +647,16 @@ class World {
         const nid = this.get(nx, ny, nz), nd = DEF[nid] || DEF[BLOCK.AIR];
         const vis = nid === BLOCK.AIR || (!d.trans && (nd.trans || nd.liquid || nd.plant || nd.rail)) || (d.trans && nid !== id && nid !== BLOCK.AIR);
         if (!vis) continue;
+        let faceKey = key;
+        if (id === BLOCK.GRASS) {
+          if (f.d[1] > 0) faceKey = "grasstop";
+          else if (f.d[1] < 0) faceKey = "dirt";
+          else faceKey = "grassside";
+        } else if (id === BLOCK.LOG) {
+          faceKey = f.d[1] !== 0 ? "logtopandbottom" : "logside";
+        }
+        const uv = this.atlas.uvFor(faceKey);
+        const uvTri = [[uv.u0, uv.v0], [uv.u0, uv.v1], [uv.u1, uv.v1], [uv.u0, uv.v0], [uv.u1, uv.v1], [uv.u1, uv.v0]];
         const c1 = col.clone().multiplyScalar(f.s), v = [f.c[0], f.c[1], f.c[2], f.c[0], f.c[2], f.c[3]];
         for (let i = 0; i < v.length; i++) {
           const q = v[i], u = uvTri[i];
@@ -662,10 +799,10 @@ class World {
   load(v) {
     if (!v) return;
     this.seed = v.seed || this.seed;
-    this.pack = PACKS[v.pack] ? v.pack : (this.pack || "classic");
+    this.pack = typeof v.pack === "string" && PACKS[v.pack] ? v.pack : (PACKS[this.pack] ? this.pack : "classic");
     this.dimension = v.dim || this.dimension;
-    if (this.atlas?.texture) this.atlas.texture.dispose();
     this.atlas = buildAtlas(this.pack);
+    this.applyGrassTextures();
     this.mod = new Map(v.mod || []);
     this.tile = new Map(v.tile || []);
     this.cd.clear();
@@ -1495,11 +1632,14 @@ class Game {
   loadWorld(slot) {
     const raw = localStorage.getItem(`webcraft:${slot}`); if (!raw) { this.chat(`No save found in ${slot}.`); this.newWorld(Math.floor(Math.random() * 1e9), slot); return; }
     const v = JSON.parse(raw); this.slot = slot;
+    const savedPack = typeof v?.world?.pack === "string" ? v.world.pack : "classic";
+    const packName = PACKS[savedPack] ? savedPack : "classic";
+    this.ui.pack.value = packName;
     if (this.world) {
       for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k);
       if (this.world.atlas?.texture) this.world.atlas.texture.dispose();
     }
-    this.world = new World(this.scene, v.world.seed, v.world.pack || "classic"); this.world.setPerf(this.perf.world); this.world.setRD(Number(this.ui.rd.value) || 4); this.world.load(v.world); this.world.updateLoaded(new THREE.Vector3(...v.player.pos));
+    this.world = new World(this.scene, v.world.seed, packName); this.world.setPerf(this.perf.world); this.world.setRD(Number(this.ui.rd.value) || 4); this.world.load(v.world); this.world.updateLoaded(new THREE.Vector3(...v.player.pos));
     this.clearBreakFx();
     this.p.pos.fromArray(v.player.pos); this.p.vel.fromArray(v.player.vel || [0, 0, 0]); this.p.hp = v.player.hp; this.p.hu = v.player.hu; this.p.ox = v.player.ox; this.p.xp = v.player.xp; this.p.lv = v.player.lv; this.p.creative = v.player.creative; this.yaw = v.player.yaw || 0; this.pitch = v.player.pitch || 0;
     this.inv = new Inventory(); this.inv.load(v.inv); this.time = v.time || 6000; this.achs = new Set(v.ach || []); this.weather = v.weather || { t: "clear", timer: 20, i: 0 }; this.replay = v.replay || [];
@@ -1817,4 +1957,4 @@ class Game {
 }
 
 window.WebCraftPlugins = window.WebCraftPlugins || [];
-new Game();
+window.__webcraft = new Game();
