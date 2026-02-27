@@ -9,6 +9,9 @@ const WORLD_H = 48;
 const SEA = 26;
 const MAX_RD = 6;
 const MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const HW_THREADS = navigator.hardwareConcurrency || 4;
+const RAM_GB = navigator.deviceMemory || 4;
+const LOW_END_DEVICE = MOBILE || HW_THREADS <= 4 || RAM_GB <= 4;
 
 const BLOCK = {
   AIR: 0,
@@ -262,6 +265,12 @@ class World {
     this.fire = new Set();
     this.power = new Set();
     this.loaded = new Set();
+    this.pending = new Set();
+    this.rebuildBudget = 4;
+    this.maxChunkLights = 8;
+    this.fluidLimit = 220;
+    this.decayLimit = 100;
+    this.fireLimit = 100;
     this.atlas = buildAtlas(this.pack);
   }
   ck(cx, cz) { return `${cx},${cz}`; }
@@ -276,6 +285,13 @@ class World {
     for (const k of this.loaded) this.rebuildKey(k);
   }
   setRD(v) { this.rd = clamp(Math.round(v), 2, MAX_RD); }
+  setPerf(o = {}) {
+    if (o.rebuildBudget !== undefined) this.rebuildBudget = clamp(Math.floor(o.rebuildBudget), 1, 12);
+    if (o.chunkLights !== undefined) this.maxChunkLights = clamp(Math.floor(o.chunkLights), 0, 8);
+    if (o.fluidLimit !== undefined) this.fluidLimit = clamp(Math.floor(o.fluidLimit), 40, 320);
+    if (o.decayLimit !== undefined) this.decayLimit = clamp(Math.floor(o.decayLimit), 20, 200);
+    if (o.fireLimit !== undefined) this.fireLimit = clamp(Math.floor(o.fireLimit), 20, 200);
+  }
   ensure(cx, cz) {
     const k = this.ck(cx, cz);
     if (!this.cd.has(k)) this.cd.set(k, this.gen(cx, cz));
@@ -442,16 +458,19 @@ class World {
   }
   rebuildNear(x, y, z) {
     const [cx, cz] = this.cc(x, z);
-    this.rebuild(cx, cz);
-    if (this.lc(x) === 0) this.rebuild(cx - 1, cz);
-    if (this.lc(x) === CHUNK - 1) this.rebuild(cx + 1, cz);
-    if (this.lc(z) === 0) this.rebuild(cx, cz - 1);
-    if (this.lc(z) === CHUNK - 1) this.rebuild(cx, cz + 1);
+    this.queueRebuild(cx, cz);
+    if (this.lc(x) === 0) this.queueRebuild(cx - 1, cz);
+    if (this.lc(x) === CHUNK - 1) this.queueRebuild(cx + 1, cz);
+    if (this.lc(z) === 0) this.queueRebuild(cx, cz - 1);
+    if (this.lc(z) === CHUNK - 1) this.queueRebuild(cx, cz + 1);
+  }
+  queueRebuild(cx, cz) {
+    const k = this.ck(cx, cz);
+    if (this.loaded.has(k)) this.pending.add(k);
   }
   rebuildKey(k) {
     if (k.includes(":")) return;
-    const [cx, cz] = k.split(",").map(Number);
-    this.rebuild(cx, cz);
+    this.pending.add(k);
   }
   dropMesh(k) {
     const o = this.cm.get(`${k}:o`), t = this.cm.get(`${k}:t`);
@@ -522,8 +541,10 @@ class World {
   }
   chunkLight(c) {
     const k = this.ck(c.cx, c.cz), old = this.cl.get(k); if (old) old.forEach((x) => this.scene.remove(x));
+    const lim = this.maxChunkLights;
+    if (lim <= 0) { this.cl.set(k, []); return; }
     const out = []; let n = 0;
-    for (let lx = 0; lx < CHUNK && n < 8; lx++) for (let lz = 0; lz < CHUNK && n < 8; lz++) for (let y = 1; y < WORLD_H - 1 && n < 8; y++) {
+    for (let lx = 0; lx < CHUNK && n < lim; lx++) for (let lz = 0; lz < CHUNK && n < lim; lz++) for (let y = 1; y < WORLD_H - 1 && n < lim; y++) {
       const id = c.b[this.idx(lx, y, lz)], lv = DEF[id]?.light || 0; if (lv <= 0) continue;
       const l = new THREE.PointLight(id === BLOCK.LAVA ? 0xff7722 : 0xffe29b, 0.35 + lv / 18, 8 + lv);
       l.position.set(c.cx * CHUNK + lx + 0.5, y + 0.6, c.cz * CHUNK + lz + 0.5);
@@ -537,9 +558,19 @@ class World {
       const cx = pcx + dx, cz = pcz + dz, k = this.ck(cx, cz);
       want.add(k); this.loaded.add(k);
       const c = this.ensure(cx, cz);
-      if (!this.cm.has(`${k}:o`) && !this.cm.has(`${k}:t`) || c.dirty) this.rebuild(cx, cz);
+      if ((!this.cm.has(`${k}:o`) && !this.cm.has(`${k}:t`)) || c.dirty) this.pending.add(k);
     }
-    for (const k of Array.from(this.loaded)) if (!want.has(k)) { this.loaded.delete(k); this.dropMesh(k); }
+    for (const k of Array.from(this.loaded)) if (!want.has(k)) { this.loaded.delete(k); this.pending.delete(k); this.dropMesh(k); }
+    const todo = Array.from(this.pending).filter((k) => this.loaded.has(k));
+    todo.sort((a, b) => {
+      const [ax, az] = a.split(",").map(Number), [bx, bz] = b.split(",").map(Number);
+      return (Math.abs(ax - pcx) + Math.abs(az - pcz)) - (Math.abs(bx - pcx) + Math.abs(bz - pcz));
+    });
+    for (let i = 0; i < Math.min(this.rebuildBudget, todo.length); i++) {
+      const k = todo[i], [cx, cz] = k.split(",").map(Number);
+      this.rebuild(cx, cz);
+      this.pending.delete(k);
+    }
   }
   ray(origin, dir, dist) {
     const p = origin.clone(), s = dir.clone().normalize().multiplyScalar(0.08), prev = new THREE.Vector3().copy(p);
@@ -567,9 +598,9 @@ class World {
       for (let i = 0; i < Math.min(all.length, lim); i++) fn(all[i]);
       for (let i = lim; i < all.length; i++) set.add(all[i]);
     };
-    run(this.fluid, (k) => { const [x, y, z] = k.split(",").map(Number); this.upFluid(x, y, z); }, 220);
-    run(this.decay, (k) => { const [x, y, z] = k.split(",").map(Number); this.upDecay(x, y, z); }, 100);
-    run(this.fire, (k) => { const [x, y, z] = k.split(",").map(Number); this.upFire(x, y, z); }, 100);
+    run(this.fluid, (k) => { const [x, y, z] = k.split(",").map(Number); this.upFluid(x, y, z); }, this.fluidLimit);
+    run(this.decay, (k) => { const [x, y, z] = k.split(",").map(Number); this.upDecay(x, y, z); }, this.decayLimit);
+    run(this.fire, (k) => { const [x, y, z] = k.split(",").map(Number); this.upFire(x, y, z); }, this.fireLimit);
     this.fallTick();
   }
   upFluid(x, y, z) {
@@ -638,6 +669,7 @@ class World {
     this.mod = new Map(v.mod || []);
     this.tile = new Map(v.tile || []);
     this.cd.clear();
+    this.pending.clear();
     for (const k of this.loaded) this.dropMesh(k);
     this.loaded.clear();
   }
@@ -686,10 +718,12 @@ class AudioSys {
 }
 
 class Particles {
-  constructor(scene) { this.scene = scene; this.p = []; }
+  constructor(scene, scale = 1, max = 420) { this.scene = scene; this.p = []; this.scale = scale; this.max = max; }
   burst(pos, hex = 0xffffff, n = 12, s = 2.5, life = 0.55) {
+    const count = clamp(Math.floor(n * this.scale), 1, 120);
+    if (this.p.length >= this.max) return;
     const col = new THREE.Color(hex);
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < count && this.p.length < this.max; i++) {
       const m = new THREE.Mesh(new THREE.SphereGeometry(0.04, 5, 5), new THREE.MeshBasicMaterial({ color: col }));
       m.position.copy(pos); this.scene.add(m);
       this.p.push({ m, v: new THREE.Vector3((Math.random() - 0.5) * s, Math.random() * s, (Math.random() - 0.5) * s), l: life + Math.random() * 0.3 });
@@ -704,7 +738,16 @@ class Particles {
 }
 
 class MobSys {
-  constructor(game) { this.g = game; this.m = []; this.ar = []; this.v = []; this.spawn = 2; this.boss = 0; this.matCache = new Map(); }
+  constructor(game) {
+    this.g = game; this.m = []; this.ar = []; this.v = [];
+    this.spawn = 2; this.spawnInterval = 1.2; this.hostileCap = 10; this.passiveCap = 8;
+    this.boss = 0; this.matCache = new Map();
+  }
+  setPerf(o = {}) {
+    if (o.spawnInterval !== undefined) this.spawnInterval = clamp(o.spawnInterval, 0.7, 3.5);
+    if (o.hostileCap !== undefined) this.hostileCap = clamp(Math.floor(o.hostileCap), 2, 20);
+    if (o.passiveCap !== undefined) this.passiveCap = clamp(Math.floor(o.passiveCap), 2, 16);
+  }
   clear() { this.m.forEach((x) => x.mesh && this.g.scene.remove(x.mesh)); this.ar.forEach((x) => this.g.scene.remove(x.mesh)); this.v.forEach((x) => this.g.scene.remove(x.mesh)); this.m = []; this.ar = []; this.v = []; this.boss = 0; }
   save() { return { m: this.m.map((x) => ({ t: x.t, p: x.p.toArray(), h: x.h, data: x.data })), boss: this.boss, v: this.v.map((x) => ({ t: x.t, p: x.p.toArray() })) }; }
   load(v) { this.clear(); if (!v) return; this.boss = !!v.boss; (v.m || []).forEach((x) => this.spawnMob(x.t, new THREE.Vector3(...x.p), { h: x.h, data: x.data })); (v.v || []).forEach((x) => this.spawnVehicle(x.t, new THREE.Vector3(...x.p))); }
@@ -1025,15 +1068,15 @@ class MobSys {
     const p = this.g.p, w = this.g.world;
     this.spawn -= dt;
     if (this.spawn <= 0) {
-      this.spawn = 1.2;
+      this.spawn = this.spawnInterval;
       const tn = (this.g.time % 24000) / 24000, night = Math.sin(tn * Math.PI * 2) < 0;
       for (let i = 0; i < 2; i++) {
         const a = Math.random() * Math.PI * 2, dist = 18 + Math.random() * 22;
         const x = Math.floor(p.pos.x + Math.cos(a) * dist), z = Math.floor(p.pos.z + Math.sin(a) * dist), y = w.surface(x, z) + 1;
         if (Math.abs(y - p.pos.y) > 18) continue;
         const l = w.lightAt(x, y, z, tn);
-        if (night && l <= 6 && this.near(x, y, z, 24) < 10) this.spawnMob(Math.random() < 0.6 ? "zombie" : "skeleton", new THREE.Vector3(x + 0.5, y, z + 0.5));
-        else if (!night && w.get(x, y - 1, z) === BLOCK.GRASS && this.near(x, y, z, 24) < 8) this.spawnMob(Math.random() < 0.5 ? "cow" : "sheep", new THREE.Vector3(x + 0.5, y, z + 0.5));
+        if (night && l <= 6 && this.near(x, y, z, 24) < this.hostileCap) this.spawnMob(Math.random() < 0.6 ? "zombie" : "skeleton", new THREE.Vector3(x + 0.5, y, z + 0.5));
+        else if (!night && w.get(x, y - 1, z) === BLOCK.GRASS && this.near(x, y, z, 24) < this.passiveCap) this.spawnMob(Math.random() < 0.5 ? "cow" : "sheep", new THREE.Vector3(x + 0.5, y, z + 0.5));
       }
       for (const k of w.loaded) { const c = w.ensure(...k.split(",").map(Number)); if (!c.mob) { c.mob = 1; if (c.village) this.spawnMob("trader", new THREE.Vector3(c.village.x + 0.5, c.village.y, c.village.z + 0.5)); } }
       if (!this.boss && this.g.p.lv >= 5 && night && Math.random() < 0.02) { this.boss = 1; const x = p.pos.x + 30, z = p.pos.z + 18, y = w.surface(Math.floor(x), Math.floor(z)) + 1; this.spawnMob("golem", new THREE.Vector3(x, y, z)); this.g.chat("Boss approaching: Stone Golem awakened."); }
@@ -1091,25 +1134,42 @@ class MobSys {
 
 class Game {
   constructor() {
+    this.perf = {
+      low: LOW_END_DEVICE,
+      antialias: !LOW_END_DEVICE,
+      shadows: !LOW_END_DEVICE,
+      pixelRatioMax: LOW_END_DEVICE ? 1 : 2,
+      cloudCount: LOW_END_DEVICE ? 14 : 35,
+      rainCount: LOW_END_DEVICE ? 300 : 1200,
+      mapInterval: LOW_END_DEVICE ? 0.75 : 0.25,
+      mapRadius: LOW_END_DEVICE ? 22 : 36,
+      mapStep: LOW_END_DEVICE ? 2 : 1,
+      world: LOW_END_DEVICE ? { rebuildBudget: 2, chunkLights: 0, fluidLimit: 120, decayLimit: 60, fireLimit: 60 } : { rebuildBudget: 5, chunkLights: 8, fluidLimit: 220, decayLimit: 100, fireLimit: 100 },
+      particles: LOW_END_DEVICE ? { scale: 0.45, max: 180 } : { scale: 1, max: 420 },
+      mobs: LOW_END_DEVICE ? { spawnInterval: 1.9, hostileCap: 6, passiveCap: 5 } : { spawnInterval: 1.2, hostileCap: 10, passiveCap: 8 },
+    };
     this.canvas = document.getElementById("game");
-    this.r = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: false });
-    this.r.shadowMap.enabled = true; this.r.shadowMap.type = THREE.PCFSoftShadowMap; this.r.setPixelRatio(Math.min(2, window.devicePixelRatio)); this.r.setSize(window.innerWidth, window.innerHeight);
+    this.r = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: this.perf.antialias, alpha: false });
+    this.r.shadowMap.enabled = this.perf.shadows; this.r.shadowMap.type = THREE.PCFSoftShadowMap; this.r.setPixelRatio(Math.min(this.perf.pixelRatioMax, window.devicePixelRatio)); this.r.setSize(window.innerWidth, window.innerHeight);
     this.scene = new THREE.Scene(); this.scene.fog = new THREE.Fog(0xa7c8f9, 20, 170);
     this.cam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400);
     this.sky = new THREE.Mesh(new THREE.SphereGeometry(240, 24, 24), new THREE.MeshBasicMaterial({ color: 0x9ec9ff, side: THREE.BackSide })); this.scene.add(this.sky);
-    this.sun = new THREE.DirectionalLight(0xffffff, 1.0); this.sun.position.set(20, 40, 20); this.sun.castShadow = true; this.sun.shadow.mapSize.set(1024, 1024); this.sun.shadow.camera.left = -80; this.sun.shadow.camera.right = 80; this.sun.shadow.camera.top = 80; this.sun.shadow.camera.bottom = -80; this.sun.shadow.camera.near = 1; this.sun.shadow.camera.far = 180; this.scene.add(this.sun);
+    this.sun = new THREE.DirectionalLight(0xffffff, 1.0); this.sun.position.set(20, 40, 20); this.sun.castShadow = this.perf.shadows; this.sun.shadow.mapSize.set(this.perf.low ? 512 : 1024, this.perf.low ? 512 : 1024); this.sun.shadow.camera.left = -80; this.sun.shadow.camera.right = 80; this.sun.shadow.camera.top = 80; this.sun.shadow.camera.bottom = -80; this.sun.shadow.camera.near = 1; this.sun.shadow.camera.far = 180; this.scene.add(this.sun);
     this.amb = new THREE.AmbientLight(0x88aacc, 0.45); this.scene.add(this.amb);
     this.sunBall = new THREE.Mesh(new THREE.SphereGeometry(2.2, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffeb99 })); this.moon = new THREE.Mesh(new THREE.SphereGeometry(1.8, 16, 16), new THREE.MeshBasicMaterial({ color: 0xe5ecff })); this.scene.add(this.sunBall); this.scene.add(this.moon);
-    this.clouds = new THREE.Group(); for (let i = 0; i < 35; i++) { const c = new THREE.Mesh(new THREE.BoxGeometry(8 + Math.random() * 12, 1 + Math.random() * 1.8, 4 + Math.random() * 7), new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })); c.position.set((Math.random() - 0.5) * 240, 50 + Math.random() * 18, (Math.random() - 0.5) * 240); this.clouds.add(c); } this.scene.add(this.clouds);
+    this.clouds = new THREE.Group(); for (let i = 0; i < this.perf.cloudCount; i++) { const c = new THREE.Mesh(new THREE.BoxGeometry(8 + Math.random() * 12, 1 + Math.random() * 1.8, 4 + Math.random() * 7), new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })); c.position.set((Math.random() - 0.5) * 240, 50 + Math.random() * 18, (Math.random() - 0.5) * 240); this.clouds.add(c); } this.scene.add(this.clouds);
     this.weatherSys(); this.scene.add(this.rain.points);
     this.world = new World(this.scene, Math.floor(Math.random() * 1e9));
-    this.inv = new Inventory(); this.audio = new AudioSys(); this.pfx = new Particles(this.scene); this.mobs = new MobSys(this);
+    this.world.setPerf(this.perf.world);
+    this.inv = new Inventory(); this.audio = new AudioSys(); this.pfx = new Particles(this.scene, this.perf.particles.scale, this.perf.particles.max); this.mobs = new MobSys(this); this.mobs.setPerf(this.perf.mobs);
     this.breakFx = this.mkBreakFx();
     this.p = { pos: new THREE.Vector3(8.5, 45, 8.5), vel: new THREE.Vector3(), g: 0, swim: 0, hp: 20, hu: 20, ox: 20, xp: 0, lv: 1, creative: 0, sprint: 0, at: 0, bt: null, bp: 0, fs: 0, mount: null, emo: 0, data: {} };
     this.pm = this.playerModel(); this.scene.add(this.pm);
     this.yaw = 0; this.pitch = 0; this.third = 0;
     this.keys = new Set(); this.md = { l: 0, r: 0 }; this.placeCd = 0; this.useCd = 0; this.foodCd = 0; this.step = 0; this.acc = 0; this.time = 6000; this.replay = []; this.replayGhost = null; this.replayOn = 0; this.achs = new Set(); this.chatOpen = 0; this.items = []; this.plugins = window.WebCraftPlugins || [];
     this.invCursor = mk(); this.invMouse = { x: -999, y: -999 };
+    this.mapCd = 0; this.loadCd = 0;
+    this.perfAnnounced = false;
     this.ui = this.bindUI(); this.events(); this.newWorld(Math.floor(Math.random() * 1e9), "slot1");
     if (MOBILE) { document.getElementById("touch-controls").classList.remove("hidden"); this.touch(); }
     this.last = performance.now(); requestAnimationFrame(this.loop.bind(this));
@@ -1174,7 +1234,7 @@ class Game {
     this.breakFx.stage = -1;
   }
   weatherSys() {
-    const n = 1200, p = new Float32Array(n * 3);
+    const n = this.perf?.rainCount || 1200, p = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) { p[i * 3] = (Math.random() - 0.5) * 60; p[i * 3 + 1] = Math.random() * 40; p[i * 3 + 2] = (Math.random() - 0.5) * 60; }
     const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(p, 3));
     this.rain = { points: new THREE.Points(g, new THREE.PointsMaterial({ color: 0x97bff8, size: 0.1, transparent: true, opacity: 0.6 })), n };
@@ -1194,6 +1254,10 @@ class Game {
     document.getElementById("start-new").addEventListener("click", () => { const t = u.seed.value.trim(), seed = t ? (Number(t) || hs(t)) : Math.floor(Math.random() * 1e9); this.newWorld(seed, u.slot.value); u.menu.classList.add("hidden"); this.lock(); });
     document.getElementById("load-world").addEventListener("click", () => { this.loadWorld(u.slot.value); u.menu.classList.add("hidden"); this.lock(); });
     u.rd.addEventListener("input", () => this.world.setRD(Number(u.rd.value)));
+    if (this.perf.low) {
+      u.rd.max = "4";
+      if (Number(u.rd.value) > 4) u.rd.value = "4";
+    }
     u.pack.addEventListener("change", () => this.world.setPack(u.pack.value));
     u.skin.addEventListener("input", () => this.pm.material.color.set(u.skin.value));
     document.getElementById("toggle-third-person").addEventListener("click", () => { this.third = !this.third; });
@@ -1411,7 +1475,7 @@ class Game {
       for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k);
       if (this.world.atlas?.texture) this.world.atlas.texture.dispose();
     }
-    this.slot = slot; this.world = new World(this.scene, seed, this.ui.pack.value || "classic"); this.world.setRD(Number(this.ui.rd.value) || 4);
+    this.slot = slot; this.world = new World(this.scene, seed, this.ui.pack.value || "classic"); this.world.setPerf(this.perf.world); this.world.setRD(Number(this.ui.rd.value) || 4);
     this.mobs.clear(); this.items.forEach((d) => this.scene.remove(d.mesh)); this.items = [];
     this.clearBreakFx();
     this.inv = new Inventory();
@@ -1422,6 +1486,7 @@ class Game {
     this.world.updateLoaded(this.p.pos);
     this.p.fs = this.p.pos.y;
     this.rHot(); this.rInv(); this.rCraft(); this.chat(`New world started. Seed ${seed}.`); ["Tutorial: Left click to break, right click to place.", "Tutorial: E inventory, C crafting, F interact with furnace/chest/table.", "Tutorial: Switch to creative with M. Use /brush stone 3 for terrain tools.", "Tutorial: Build portal blocks and press L while inside to change dimension."].forEach((x) => this.chat(x));
+    if (this.perf.low && !this.perfAnnounced) { this.chat("Performance mode enabled for low-end devices: reduced shadows/lights/effects and chunk batching."); this.perfAnnounced = true; }
   }
   saveWorld(slot) {
     const v = { world: this.world.save(), player: { pos: this.p.pos.toArray(), vel: this.p.vel.toArray(), hp: this.p.hp, hu: this.p.hu, ox: this.p.ox, xp: this.p.xp, lv: this.p.lv, creative: this.p.creative, yaw: this.yaw, pitch: this.pitch }, inv: this.inv.json(), time: this.time, ach: Array.from(this.achs), mobs: this.mobs.save(), weather: this.weather, replay: this.replay.slice(-300), ver: 1 };
@@ -1434,7 +1499,7 @@ class Game {
       for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k);
       if (this.world.atlas?.texture) this.world.atlas.texture.dispose();
     }
-    this.world = new World(this.scene, v.world.seed, v.world.pack || "classic"); this.world.setRD(Number(this.ui.rd.value) || 4); this.world.load(v.world); this.world.updateLoaded(new THREE.Vector3(...v.player.pos));
+    this.world = new World(this.scene, v.world.seed, v.world.pack || "classic"); this.world.setPerf(this.perf.world); this.world.setRD(Number(this.ui.rd.value) || 4); this.world.load(v.world); this.world.updateLoaded(new THREE.Vector3(...v.player.pos));
     this.clearBreakFx();
     this.p.pos.fromArray(v.player.pos); this.p.vel.fromArray(v.player.vel || [0, 0, 0]); this.p.hp = v.player.hp; this.p.hu = v.player.hu; this.p.ox = v.player.ox; this.p.xp = v.player.xp; this.p.lv = v.player.lv; this.p.creative = v.player.creative; this.yaw = v.player.yaw || 0; this.pitch = v.player.pitch || 0;
     this.inv = new Inventory(); this.inv.load(v.inv); this.time = v.time || 6000; this.achs = new Set(v.ach || []); this.weather = v.weather || { t: "clear", timer: 20, i: 0 }; this.replay = v.replay || [];
@@ -1715,7 +1780,21 @@ class Game {
     }
   }
   rCraft() { this.ui.rec.innerHTML = ""; RECIPES.forEach((r) => { const d = document.createElement("div"); d.className = "recipe"; d.innerHTML = `<strong>${r.out.id} x${r.out.c}</strong><span>${Object.entries(r.in).map(([k, v]) => `${k}x${v}`).join(", ")}</span>`; const b = document.createElement("button"); b.textContent = "Craft"; b.addEventListener("click", () => { if (!this.inv.has(r.in)) return this.chat("Missing ingredients."); this.inv.consume(r.in); this.inv.add(r.out.id, r.out.c); this.rCraft(); this.rInv(); this.rHot(); this.ach("craft", "Craft your first item"); }); d.append(b); this.ui.rec.append(d); }); }
-  map() { const c = this.ui.map.getContext("2d"), s = this.ui.map.width, r = 36, px = Math.floor(this.p.pos.x), pz = Math.floor(this.p.pos.z); c.clearRect(0, 0, s, s); c.fillStyle = "rgba(8,12,20,0.75)"; c.fillRect(0, 0, s, s); for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) { const wx = px + dx, wz = pz + dz, y = this.world.surface(wx, wz), id = this.world.get(wx, y, wz), k = COLOR_KEY[id] || "stone", hex = (PACKS[this.world.pack] || PACKS.classic)[k] || 0xffffff; c.fillStyle = `#${hex.toString(16).padStart(6, "0")}`; const sx = Math.floor(((dx + r) / (r * 2)) * s), sz = Math.floor(((dz + r) / (r * 2)) * s); c.fillRect(sx, sz, 2, 2); } c.fillStyle = "#ff2222"; c.beginPath(); c.arc(s / 2, s / 2, 3, 0, Math.PI * 2); c.fill(); c.strokeStyle = "#ffffff"; c.beginPath(); c.moveTo(s / 2, s / 2); c.lineTo(s / 2 + Math.sin(this.yaw) * 12, s / 2 + Math.cos(this.yaw) * 12); c.stroke(); }
+  map() {
+    const c = this.ui.map.getContext("2d"), s = this.ui.map.width, r = this.perf.mapRadius, step = this.perf.mapStep, px = Math.floor(this.p.pos.x), pz = Math.floor(this.p.pos.z);
+    c.clearRect(0, 0, s, s);
+    c.fillStyle = "rgba(8,12,20,0.75)";
+    c.fillRect(0, 0, s, s);
+    const dot = Math.max(2, step * 2);
+    for (let dz = -r; dz <= r; dz += step) for (let dx = -r; dx <= r; dx += step) {
+      const wx = px + dx, wz = pz + dz, y = this.world.surface(wx, wz), id = this.world.get(wx, y, wz), k = COLOR_KEY[id] || "stone", hex = (PACKS[this.world.pack] || PACKS.classic)[k] || 0xffffff;
+      c.fillStyle = `#${hex.toString(16).padStart(6, "0")}`;
+      const sx = Math.floor(((dx + r) / (r * 2)) * s), sz = Math.floor(((dz + r) / (r * 2)) * s);
+      c.fillRect(sx, sz, dot, dot);
+    }
+    c.fillStyle = "#ff2222"; c.beginPath(); c.arc(s / 2, s / 2, 3, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = "#ffffff"; c.beginPath(); c.moveTo(s / 2, s / 2); c.lineTo(s / 2 + Math.sin(this.yaw) * 12, s / 2 + Math.cos(this.yaw) * 12); c.stroke();
+  }
   mount() { if (this.p.mount) { this.p.mount.rider = null; this.p.mount = null; this.chat("Unmounted."); return; } let n = null, d = 2; for (const v of this.mobs.v) { const dist = v.p.distanceTo(this.p.pos); if (dist < d && !v.rider) { d = dist; n = v; } } if (n) { n.rider = "player"; this.p.mount = n; this.chat(`Mounted ${n.t}.`); } }
   portal() { const x = Math.floor(this.p.pos.x), y = Math.floor(this.p.pos.y + 1), z = Math.floor(this.p.pos.z); if (this.world.get(x, y, z) !== BLOCK.PORTAL) return this.chat("Stand inside a portal block to teleport."); this.world.dimension = this.world.dimension === "overworld" ? "nether" : "overworld"; this.p.pos.y = this.world.dimension === "nether" ? 38 : 52; this.world.cd.clear(); for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k); this.world.loaded.clear(); this.world.updateLoaded(this.p.pos); this.chat(`Dimension: ${this.world.dimension}`); this.ach("dimension", "Travel to another dimension"); }
   shot() { ["hud", "hotbar", "interaction-hint", "crosshair"].forEach((i) => document.getElementById(i).classList.add("hidden")); this.r.render(this.scene, this.cam); const a = document.createElement("a"); a.href = this.canvas.toDataURL("image/png"); a.download = `webcraft-shot-${Date.now()}.png`; a.click(); ["hud", "hotbar", "interaction-hint", "crosshair"].forEach((i) => document.getElementById(i).classList.remove("hidden")); }
@@ -1726,7 +1805,10 @@ class Game {
   pluginsUp(dt) { for (const p of this.plugins) if (typeof p.onFrame === "function") try { p.onFrame({ dt, game: this }, this); } catch (e) { console.error("Plugin error", e); } }
   loop(now) {
     const dt = clamp((now - this.last) / 1000, 0, 0.05); this.last = now; this.acc += dt;
-    this.world.updateLoaded(this.p.pos); this.skyUp(dt); this.weatherUp(dt); this.pMove(dt); this.interactUp(dt); this.itemsUp(dt); this.furnUp(dt); this.mobs.up(dt); this.pfx.up(dt); this.camUp(); this.hud(); this.map(); this.replayUp(dt); this.audio.up(dt);
+    this.loadCd -= dt; if (this.loadCd <= 0) { this.loadCd = this.perf.low ? 0.08 : 0.02; this.world.updateLoaded(this.p.pos); }
+    this.skyUp(dt); this.weatherUp(dt); this.pMove(dt); this.interactUp(dt); this.itemsUp(dt); this.furnUp(dt); this.mobs.up(dt); this.pfx.up(dt); this.camUp(); this.hud();
+    this.mapCd -= dt; if (this.mapCd <= 0) { this.mapCd = this.perf.mapInterval; this.map(); }
+    this.replayUp(dt); this.audio.up(dt);
     this.audio.setOccl(clamp((SEA - this.p.pos.y) / 25, 0, 1));
     while (this.acc >= 1 / 20) { this.tick(); this.acc -= 1 / 20; }
     this.pluginsUp(dt);
