@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebCraft Solo</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="crosshair">+</div>
+
+  <div id="hud">
+    <div class="bars">
+      <div class="bar-row"><span>HP</span><div class="bar"><div id="health-fill"></div></div><span id="health-text"></span></div>
+      <div class="bar-row"><span>HU</span><div class="bar"><div id="hunger-fill"></div></div><span id="hunger-text"></span></div>
+      <div class="bar-row"><span>XP</span><div class="bar"><div id="xp-fill"></div></div><span id="xp-text"></span></div>
+      <div class="bar-row"><span>O2</span><div class="bar"><div id="oxygen-fill"></div></div><span id="oxygen-text"></span></div>
+    </div>
+    <div id="mode-pill">Survival</div>
+    <div id="coords">x:0 y:0 z:0</div>
+    <div id="clock">12:00</div>
+    <canvas id="minimap" width="180" height="180"></canvas>
+  </div>
+
+  <div id="hotbar"></div>
+
+  <div id="interaction-hint"></div>
+
+  <div id="inventory-panel" class="panel hidden">
+    <h2>Inventory</h2>
+    <p class="tiny">Storage + hotbar now; inventory slot logic is reusable for future 2x2/3x3 crafting grids.</p>
+    <div id="inventory-grid" class="grid"></div>
+    <div class="panel-actions">
+      <button data-close="inventory-panel">Close</button>
+    </div>
+  </div>
+
+  <div id="crafting-panel" class="panel hidden">
+    <h2>Crafting Table</h2>
+    <div id="crafting-recipes" class="recipes"></div>
+    <div class="panel-actions">
+      <button data-close="crafting-panel">Close</button>
+    </div>
+  </div>
+
+  <div id="furnace-panel" class="panel hidden">
+    <h2>Furnace</h2>
+    <div id="furnace-ui">
+      <label>Input <select id="furnace-input"></select></label>
+      <label>Fuel <select id="furnace-fuel"></select></label>
+      <button id="furnace-start">Smelt</button>
+      <div id="furnace-status"></div>
+    </div>
+    <div class="panel-actions">
+      <button data-close="furnace-panel">Close</button>
+    </div>
+  </div>
+
+  <div id="chest-panel" class="panel hidden">
+    <h2>Chest</h2>
+    <div id="chest-grid" class="grid"></div>
+    <div class="panel-actions">
+      <button data-close="chest-panel">Close</button>
+    </div>
+  </div>
+
+  <div id="enchant-panel" class="panel hidden">
+    <h2>Enchanting</h2>
+    <div id="enchant-options"></div>
+    <div class="panel-actions">
+      <button data-close="enchant-panel">Close</button>
+    </div>
+  </div>
+
+  <div id="settings-panel" class="panel hidden">
+    <h2>Settings</h2>
+    <label>Render Distance <input id="render-distance" type="range" min="2" max="8" step="1" value="2" /></label>
+    <label>Texture Pack
+      <select id="texture-pack">
+        <option value="classic">Classic</option>
+        <option value="pastel">Pastel</option>
+        <option value="high-contrast">High Contrast</option>
+      </select>
+    </label>
+    <label>Player Skin Color <input id="skin-color" type="color" value="#d5a07a" /></label>
+    <div class="panel-actions">
+      <button id="toggle-third-person">Toggle Third Person (F5)</button>
+      <button id="toggle-creative">Toggle Creative (M)</button>
+      <button id="take-screenshot">Photo Mode Shot</button>
+      <button data-close="settings-panel">Close</button>
+    </div>
+  </div>
+
+  <div id="menu-panel" class="panel">
+    <h1>WebCraft Solo</h1>
+    <label>World Seed <input id="seed-input" type="text" placeholder="leave empty for random" /></label>
+    <label>World Slot
+      <select id="world-slot">
+        <option value="slot1">Slot 1</option>
+        <option value="slot2">Slot 2</option>
+        <option value="slot3">Slot 3</option>
+      </select>
+    </label>
+    <div class="panel-actions">
+      <button id="start-new">New World</button>
+      <button id="load-world">Load World</button>
+    </div>
+    <p class="tiny">Controls: WASD move, Shift sprint, Space jump, E inventory, C crafting, F interact, Q drop, Left break, Right place, T chat, F5 third person.</p>
+  </div>
+
+  <div id="touch-controls" class="hidden">
+    <div id="stick-left" class="touch-stick"></div>
+    <div id="touch-buttons">
+      <button data-touch="jump">Jump</button>
+      <button data-touch="place">Place</button>
+      <button data-touch="break">Break</button>
+      <button data-touch="inventory">Inv</button>
+    </div>
+  </div>
+
+  <div id="chat-panel" class="panel hidden chat">
+    <h2>Local Chat</h2>
+    <div id="chat-log"></div>
+    <input id="chat-input" type="text" placeholder="Type message and press Enter" />
+  </div>
+
+  <div id="boot-error" class="panel hidden">
+    <h2>Boot Error</h2>
+    <p id="boot-error-text"></p>
+  </div>
+
+  <script>
+    (function () {
+      const bootError = document.getElementById("boot-error");
+      const bootErrorText = document.getElementById("boot-error-text");
+      window.showBootError = function (msg) {
+        bootErrorText.textContent = msg;
+        bootError.classList.remove("hidden");
+      };
+      window.addEventListener("error", function (e) {
+        if (!e || !e.message) return;
+        window.showBootError("Runtime error: " + e.message);
+      });
+    })();
+  </script>
+  <script src="./assets/three.min.js"></script>
+  <script>
+    if (!window.THREE) {
+      window.showBootError("Could not load ./assets/three.min.js.");
+    } else {
+      const s = document.createElement("script");
+      s.src = "./src/main.js";
+      s.onerror = function () {
+        window.showBootError("Loaded three.js but failed to load ./src/main.js.");
+      };
+      document.body.appendChild(s);
+    }
+  </script>
+</body>
+</html>
