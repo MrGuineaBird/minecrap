@@ -12,6 +12,28 @@ const MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 const HW_THREADS = navigator.hardwareConcurrency || 4;
 const RAM_GB = navigator.deviceMemory || 4;
 const LOW_END_DEVICE = MOBILE || HW_THREADS <= 4 || RAM_GB <= 4;
+// Add your own splash lines here. You can also set window.WebCraftSplashes = ["..."] before game boot.
+const TITLE_SPLASHES = [
+  "Now with extra questionable physics!",
+  "Made by a single developer in their free time!",
+  "Completely free and open source!",
+  "Inspired by Minecraft but not affiliated with Mojang!",
+  "Play on desktop for the best experience!",
+  "straight ass game cerified!",
+  "kyklos domain is peak",
+  "school unblocked!",
+  "better than eaglercraft...maybe",
+  "please down sue me mojang",
+  "yeah, games not good...cry about it"
+];
+
+function randomSplash() {
+  const extra = Array.isArray(window.WebCraftSplashes) ? window.WebCraftSplashes : [];
+  const cleanExtra = extra.filter((x) => typeof x === "string" && x.trim()).map((x) => x.trim());
+  const pool = [...TITLE_SPLASHES, ...cleanExtra];
+  if (!pool.length) return "Now with extra questionable physics!";
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 const BLOCK = {
   AIR: 0,
@@ -21,7 +43,7 @@ const BLOCK = {
   SAND: 4,
   SNOW: 5,
   LOG: 6,
-  LEAF: 7,
+  LEAF: 7, //last done
   WATER: 8,
   LAVA: 9,
   GLASS: 10,
@@ -1307,7 +1329,7 @@ class Game {
     this.invCursor = mk(); this.invMouse = { x: -999, y: -999 };
     this.mapCd = 0; this.loadCd = 0;
     this.perfAnnounced = false;
-    this.ui = this.bindUI(); this.events(); this.newWorld(Math.floor(Math.random() * 1e9), "slot1");
+    this.ui = this.bindUI(); this.events(); this.setTitleSplash(); this.newWorld(Math.floor(Math.random() * 1e9), "slot1");
     if (MOBILE) { document.getElementById("touch-controls").classList.remove("hidden"); this.touch(); }
     this.last = performance.now(); requestAnimationFrame(this.loop.bind(this));
   }
@@ -1383,13 +1405,16 @@ class Game {
   }
   bindUI() {
     const u = {
-      healthFill: document.getElementById("health-fill"), hungerFill: document.getElementById("hunger-fill"), xpFill: document.getElementById("xp-fill"), oxygenFill: document.getElementById("oxygen-fill"), healthText: document.getElementById("health-text"), hungerText: document.getElementById("hunger-text"), xpText: document.getElementById("xp-text"), oxygenText: document.getElementById("oxygen-text"), modePill: document.getElementById("mode-pill"), coords: document.getElementById("coords"), clock: document.getElementById("clock"), hotbar: document.getElementById("hotbar"), hint: document.getElementById("interaction-hint"), map: document.getElementById("minimap"), menu: document.getElementById("menu-panel"), invP: document.getElementById("inventory-panel"), craftP: document.getElementById("crafting-panel"), furP: document.getElementById("furnace-panel"), chestP: document.getElementById("chest-panel"), enchP: document.getElementById("enchant-panel"), setP: document.getElementById("settings-panel"), chatP: document.getElementById("chat-panel"), chatLog: document.getElementById("chat-log"), chatIn: document.getElementById("chat-input"), invG: document.getElementById("inventory-grid"), rec: document.getElementById("crafting-recipes"), chestG: document.getElementById("chest-grid"), enchO: document.getElementById("enchant-options"), fi: document.getElementById("furnace-input"), ff: document.getElementById("furnace-fuel"), fs: document.getElementById("furnace-start"), fst: document.getElementById("furnace-status"), rd: document.getElementById("render-distance"), pack: document.getElementById("texture-pack"), skin: document.getElementById("skin-color"), slot: document.getElementById("world-slot"), seed: document.getElementById("seed-input")
+      healthFill: document.getElementById("health-fill"), hungerFill: document.getElementById("hunger-fill"), xpFill: document.getElementById("xp-fill"), oxygenFill: document.getElementById("oxygen-fill"), healthText: document.getElementById("health-text"), hungerText: document.getElementById("hunger-text"), xpText: document.getElementById("xp-text"), oxygenText: document.getElementById("oxygen-text"), modePill: document.getElementById("mode-pill"), coords: document.getElementById("coords"), clock: document.getElementById("clock"), hotbar: document.getElementById("hotbar"), hint: document.getElementById("interaction-hint"), map: document.getElementById("minimap"), menu: document.getElementById("menu-panel"), titleSplash: document.getElementById("title-splash"), invP: document.getElementById("inventory-panel"), craftP: document.getElementById("crafting-panel"), furP: document.getElementById("furnace-panel"), chestP: document.getElementById("chest-panel"), enchP: document.getElementById("enchant-panel"), setP: document.getElementById("settings-panel"), chatP: document.getElementById("chat-panel"), chatLog: document.getElementById("chat-log"), chatIn: document.getElementById("chat-input"), invG: document.getElementById("inventory-grid"), rec: document.getElementById("crafting-recipes"), chestG: document.getElementById("chest-grid"), enchO: document.getElementById("enchant-options"), fi: document.getElementById("furnace-input"), ff: document.getElementById("furnace-fuel"), fs: document.getElementById("furnace-start"), fst: document.getElementById("furnace-status"), rd: document.getElementById("render-distance"), pack: document.getElementById("texture-pack"), skin: document.getElementById("skin-color"), slot: document.getElementById("world-slot"), seed: document.getElementById("seed-input")
     };
     u.hotbar.innerHTML = ""; for (let i = 0; i < 9; i++) { const s = document.createElement("div"); s.className = "slot"; s.dataset.i = i; u.hotbar.append(s); }
     u.fs.addEventListener("click", () => this.startSmelt());
     document.querySelectorAll("[data-close]").forEach((e) => e.addEventListener("click", () => { document.getElementById(e.dataset.close).classList.add("hidden"); this.lockIf(); }));
     document.getElementById("start-new").addEventListener("click", () => { const t = u.seed.value.trim(), seed = t ? (Number(t) || hs(t)) : Math.floor(Math.random() * 1e9); this.newWorld(seed, u.slot.value); u.menu.classList.add("hidden"); this.lock(); });
     document.getElementById("load-world").addEventListener("click", () => { this.loadWorld(u.slot.value); u.menu.classList.add("hidden"); this.lock(); });
+    document.getElementById("open-options")?.addEventListener("click", () => {
+      this.ui.setP.classList.remove("hidden");
+    });
     u.rd.addEventListener("input", () => this.world.setRD(Number(u.rd.value)));
     if (this.perf.low) {
       u.rd.max = "4";
@@ -1409,6 +1434,10 @@ class Game {
       document.body.append(u.invCursor);
     }
     return u;
+  }
+  setTitleSplash() {
+    if (!this.ui?.titleSplash) return;
+    this.ui.titleSplash.textContent = randomSplash();
   }
   touch() {
     const stick = document.getElementById("stick-left"), btns = document.querySelectorAll("#touch-buttons button");
