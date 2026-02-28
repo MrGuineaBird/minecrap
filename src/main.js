@@ -43,7 +43,7 @@ const BLOCK = {
   SAND: 4,
   SNOW: 5,
   LOG: 6,
-  LEAF: 7,
+  LEAF: 7, //last done
   WATER: 8,
   LAVA: 9,
   GLASS: 10,
@@ -58,13 +58,10 @@ const BLOCK = {
   FARM: 19,
   CROP: 20,
   TORCH: 21,
-  DOOR: 25,
-};
-
-const LEGACY_BLOCK = {
   TNT: 22,
   RED: 23,
   SWITCH: 24,
+  DOOR: 25,
   PISTON: 26,
   RAIL: 27,
   PORTAL: 28,
@@ -72,22 +69,7 @@ const LEGACY_BLOCK = {
   ENCHANT: 30,
 };
 
-const DISABLED_BLOCK_IDS = new Set([
-  LEGACY_BLOCK.TNT,
-  LEGACY_BLOCK.RED,
-  LEGACY_BLOCK.SWITCH,
-  LEGACY_BLOCK.PISTON,
-  LEGACY_BLOCK.RAIL,
-  LEGACY_BLOCK.PORTAL,
-  LEGACY_BLOCK.OBS,
-  LEGACY_BLOCK.ENCHANT,
-]);
-
-const NAME = Object.fromEntries(
-  Object.entries(BLOCK)
-    .filter(([, v]) => !DISABLED_BLOCK_IDS.has(v))
-    .map(([k, v]) => [v, k.toLowerCase()])
-);
+const NAME = Object.fromEntries(Object.entries(BLOCK).map(([k, v]) => [v, k.toLowerCase()]));
 
 const DEF = {
   [BLOCK.AIR]: { solid: 0, trans: 1, repl: 1 },
@@ -112,28 +94,30 @@ const DEF = {
   [BLOCK.FARM]: { solid: 1, hard: 0.6, tool: "shovel", drop: "dirt" },
   [BLOCK.CROP]: { solid: 0, trans: 1, repl: 1, plant: 1, drop: "wheat" },
   [BLOCK.TORCH]: { solid: 0, trans: 1, repl: 1, light: 12, drop: "torch" },
+  [BLOCK.TNT]: { solid: 1, hard: 0.2, drop: "tnt", tnt: 1 },
+  [BLOCK.RED]: { solid: 0, trans: 1, repl: 1, red: 1, drop: "redstone" },
+  [BLOCK.SWITCH]: { solid: 1, hard: 0.5, use: "switch", drop: "switch" },
   [BLOCK.DOOR]: { solid: 1, hard: 0.8, use: "door", drop: "door" },
+  [BLOCK.PISTON]: { solid: 1, hard: 1.4, drop: "piston" },
+  [BLOCK.RAIL]: { solid: 0, trans: 1, repl: 1, rail: 1, drop: "rail" },
+  [BLOCK.PORTAL]: { solid: 0, trans: 1, repl: 1 },
+  [BLOCK.OBS]: { solid: 1, hard: 40, tool: "pickaxe", drop: "obsidian" },
+  [BLOCK.ENCHANT]: { solid: 1, hard: 3.0, drop: "enchant_table", use: "enchant" },
 };
 
 const PACKS = {
-  classic: { grass: 0x5ca645, dirt: 0x7a5134, stone: 0x8b8e95, sand: 0xdcc683, snow: 0xf4f8ff, log: 0x6c4930, leaf: 0x2f7d40, water: 0x4f83ff, lava: 0xff7c2b, glass: 0xb6e2ff, coal: 0x55585a, iron: 0xbd8e67, gold: 0xd6bb50, plank: 0xa5744a, cobble: 0x72747c, craft: 0x9f6d3f, furnace: 0x666c74, chest: 0xa8793e, farm: 0x5f402b, crop: 0x70c553, torch: 0xffe396, door: 0x8a663e },
-  pastel: { grass: 0x93d27d, dirt: 0xc39a7a, stone: 0xb6b9c6, sand: 0xf5dea5, snow: 0xfafcff, log: 0xb38a6c, leaf: 0x78c994, water: 0x86b9ff, lava: 0xffaa7a, glass: 0xd8f3ff, coal: 0x86889b, iron: 0xd0ab92, gold: 0xf2d173, plank: 0xcfaa7a, cobble: 0x9da2b0, craft: 0xc79b68, furnace: 0x989cab, chest: 0xd2aa6d, farm: 0x9a6e4a, crop: 0x94db79, torch: 0xffebbb, door: 0xbc9366 },
-  "high-contrast": { grass: 0x40ff40, dirt: 0x8f4b00, stone: 0xb0b0b0, sand: 0xffee6f, snow: 0xffffff, log: 0x87561d, leaf: 0x009e35, water: 0x3070ff, lava: 0xff4f00, glass: 0xbff1ff, coal: 0x4b4b4b, iron: 0xcf8d57, gold: 0xffcd37, plank: 0xc08b42, cobble: 0x8e8e8e, craft: 0xb97a2a, furnace: 0x7a7a7a, chest: 0xcc8f2f, farm: 0x5d3200, crop: 0x4dfa46, torch: 0xfff09d, door: 0xa26e2d },
+  classic: { grass: 0x5ca645, dirt: 0x7a5134, stone: 0x8b8e95, sand: 0xdcc683, snow: 0xf4f8ff, log: 0x6c4930, leaf: 0x2f7d40, water: 0x4f83ff, lava: 0xff7c2b, glass: 0xb6e2ff, coal: 0x55585a, iron: 0xbd8e67, gold: 0xd6bb50, plank: 0xa5744a, cobble: 0x72747c, craft: 0x9f6d3f, furnace: 0x666c74, chest: 0xa8793e, farm: 0x5f402b, crop: 0x70c553, torch: 0xffe396, tnt: 0xd25050, red: 0xbf2b2b, switch: 0x7a694f, door: 0x8a663e, piston: 0x77705e, rail: 0xbe9a45, portal: 0x7b3fbf, obs: 0x25203a, enchant: 0x324fb6 },
+  pastel: { grass: 0x93d27d, dirt: 0xc39a7a, stone: 0xb6b9c6, sand: 0xf5dea5, snow: 0xfafcff, log: 0xb38a6c, leaf: 0x78c994, water: 0x86b9ff, lava: 0xffaa7a, glass: 0xd8f3ff, coal: 0x86889b, iron: 0xd0ab92, gold: 0xf2d173, plank: 0xcfaa7a, cobble: 0x9da2b0, craft: 0xc79b68, furnace: 0x989cab, chest: 0xd2aa6d, farm: 0x9a6e4a, crop: 0x94db79, torch: 0xffebbb, tnt: 0xe98383, red: 0xdd6262, switch: 0xab9b80, door: 0xbc9366, piston: 0xa4a093, rail: 0xd3b56a, portal: 0xad7be0, obs: 0x4f4667, enchant: 0x6f90f7 },
+  "high-contrast": { grass: 0x40ff40, dirt: 0x8f4b00, stone: 0xb0b0b0, sand: 0xffee6f, snow: 0xffffff, log: 0x87561d, leaf: 0x009e35, water: 0x3070ff, lava: 0xff4f00, glass: 0xbff1ff, coal: 0x4b4b4b, iron: 0xcf8d57, gold: 0xffcd37, plank: 0xc08b42, cobble: 0x8e8e8e, craft: 0xb97a2a, furnace: 0x7a7a7a, chest: 0xcc8f2f, farm: 0x5d3200, crop: 0x4dfa46, torch: 0xfff09d, tnt: 0xff0000, red: 0xff2a2a, switch: 0x91805d, door: 0xa26e2d, piston: 0x89806f, rail: 0xe2b33f, portal: 0xb331ff, obs: 0x1f1635, enchant: 0x2052ff },
 };
 
 const COLOR_KEY = {
-  [BLOCK.GRASS]: "grass", [BLOCK.DIRT]: "dirt", [BLOCK.STONE]: "stone", [BLOCK.SAND]: "sand", [BLOCK.SNOW]: "snow", [BLOCK.LOG]: "log", [BLOCK.LEAF]: "leaf", [BLOCK.WATER]: "water", [BLOCK.LAVA]: "lava", [BLOCK.GLASS]: "glass", [BLOCK.COAL]: "coal", [BLOCK.IRON]: "iron", [BLOCK.GOLD]: "gold", [BLOCK.PLANK]: "plank", [BLOCK.COBBLE]: "cobble", [BLOCK.CRAFT]: "craft", [BLOCK.FURNACE]: "furnace", [BLOCK.CHEST]: "chest", [BLOCK.FARM]: "farm", [BLOCK.CROP]: "crop", [BLOCK.TORCH]: "torch", [BLOCK.DOOR]: "door",
+  [BLOCK.GRASS]: "grass", [BLOCK.DIRT]: "dirt", [BLOCK.STONE]: "stone", [BLOCK.SAND]: "sand", [BLOCK.SNOW]: "snow", [BLOCK.LOG]: "log", [BLOCK.LEAF]: "leaf", [BLOCK.WATER]: "water", [BLOCK.LAVA]: "lava", [BLOCK.GLASS]: "glass", [BLOCK.COAL]: "coal", [BLOCK.IRON]: "iron", [BLOCK.GOLD]: "gold", [BLOCK.PLANK]: "plank", [BLOCK.COBBLE]: "cobble", [BLOCK.CRAFT]: "craft", [BLOCK.FURNACE]: "furnace", [BLOCK.CHEST]: "chest", [BLOCK.FARM]: "farm", [BLOCK.CROP]: "crop", [BLOCK.TORCH]: "torch", [BLOCK.TNT]: "tnt", [BLOCK.RED]: "red", [BLOCK.SWITCH]: "switch", [BLOCK.DOOR]: "door", [BLOCK.PISTON]: "piston", [BLOCK.RAIL]: "rail", [BLOCK.PORTAL]: "portal", [BLOCK.OBS]: "obs", [BLOCK.ENCHANT]: "enchant",
 };
 
 const ATLAS_TILE = 16;
 const ATLAS_COLS = 8;
-const EXTRA_TILE_KEYS = [
-  "grasstop", "grassside", "logside", "logtopandbottom",
-  "crafttop", "craftside", "craftfront",
-  "furnaceside", "furnacetopandbottom", "furnacefrontoff", "furnacefronton",
-  "chesttop", "chestfront", "chestback", "chestside",
-  "doortop", "doorbottom",
-];
+const EXTRA_TILE_KEYS = ["grasstop", "grassside", "logside", "logtopandbottom"];
 const TILE_KEYS = [...new Set([...Object.keys(PACKS.classic), ...EXTRA_TILE_KEYS])];
 const TILE_INDEX = new Map(TILE_KEYS.map((k, i) => [k, i]));
 const FILE_PROTOCOL = typeof window !== "undefined" && window.location?.protocol === "file:";
@@ -147,30 +131,6 @@ const CUSTOM_TILE_TEXTURE_FILES = {
   snow: ["snow.png"],
   logside: ["logside.png"],
   logtopandbottom: ["logtopandbottom.png"],
-  glass: ["glass.png"],
-  coal: ["coal.png"],
-  iron: ["iron.png"],
-  gold: ["gold.png"],
-  plank: ["plank.png"],
-  cobble: ["cobble.png"],
-  torch: ["torch.png"],
-  craft: ["craftingtableSIDE.png", "craftingtableSIDE.PNG", "craftingtableSIDE.png", "craftside.png"],
-  crafttop: ["craftingtableTOP.png", "craftingtabletop.png", "crafttop.png"],
-  craftside: ["craftingtableSIDE.png", "craftingtableside.png", "craftside.png"],
-  craftfront: ["craftingtableFRONT.png", "craftingtablefront.png", "craftfront.png"],
-  furnace: ["furnaceside.png", "furnacefrontOFF.png", "furnacefrontoff.png"],
-  furnaceside: ["furnaceside.png"],
-  furnacetopandbottom: ["furnacetopandbottom.png"],
-  furnacefrontoff: ["furnacefrontOFF.png", "furnacefrontoff.png"],
-  furnacefronton: ["furnacefrontON.png", "furnacefronton.png"],
-  chest: ["chestfront.png", "chesttop.png", "chestback.png"],
-  chesttop: ["chesttop.png"],
-  chestfront: ["chestfront.png"],
-  chestback: ["chestback.png"],
-  chestside: ["chestside.png", "chestfront.png", "chestback.png"],
-  door: ["doorbottom.png", "doorTOP.png", "door.png"],
-  doortop: ["doorTOP.png", "doortop.png", "door_top.png"],
-  doorbottom: ["doorbottom.png", "doorBOTTOM.png", "door_bottom.png"],
   leaf: ["leaves.png", "leaf.png"],
 };
 const CUSTOM_TILE_TEXTURE_KEYS = Object.keys(CUSTOM_TILE_TEXTURE_FILES);
@@ -199,10 +159,6 @@ function textureUrlsForKey(key) {
 function tileColorKey(key) {
   if (key === "grasstop" || key === "grassside") return "grass";
   if (key === "logside" || key === "logtopandbottom") return "log";
-  if (key === "crafttop" || key === "craftside" || key === "craftfront") return "craft";
-  if (key === "furnaceside" || key === "furnacetopandbottom" || key === "furnacefrontoff" || key === "furnacefronton") return "furnace";
-  if (key === "chesttop" || key === "chestfront" || key === "chestback" || key === "chestside") return "chest";
-  if (key === "doortop" || key === "doorbottom") return "door";
   return key;
 }
 
@@ -211,7 +167,7 @@ function hexRGB(hex) {
 }
 
 function tileShade(key, x, y, seed) {
-  const k = tileColorKey(key);
+  const k = key === "grasstop" || key === "grassside" ? "grass" : (key === "logside" || key === "logtopandbottom" ? "log" : key);
   let shade = 0.9 + (r01(x, y, 0, seed) - 0.5) * 0.24;
   if (k === "log" && x % 4 < 2) shade *= 0.73;
   if (k === "plank" && y % 4 === 0) shade *= 0.84;
@@ -342,58 +298,11 @@ function drawAtlasTileImage(atlas, key, img) {
 }
 
 const ITEM = {
-  dirt: { block: BLOCK.DIRT, max: 64 },
-  sand: { block: BLOCK.SAND, max: 64 },
-  snow: { block: BLOCK.SNOW, max: 64 },
-  cobble: { block: BLOCK.COBBLE, max: 64 },
-  log: { block: BLOCK.LOG, max: 64 },
-  plank: { block: BLOCK.PLANK, max: 64 },
-  stick: { max: 64, fuel: 5 },
-  glass: { block: BLOCK.GLASS, max: 64 },
-  torch: { block: BLOCK.TORCH, max: 64 },
-  chest: { block: BLOCK.CHEST, max: 64 },
-  furnace: { block: BLOCK.FURNACE, max: 64 },
-  crafting_table: { block: BLOCK.CRAFT, max: 64 },
-  door: { block: BLOCK.DOOR, max: 64 },
-  redstone: { max: 64 },
-  seed: { crop: 1, max: 64 },
-  wheat: { food: 2, satMod: 0.6, max: 64 },
-  bread: { food: 5, satMod: 0.6, max: 64 },
-  raw_meat: { food: 1, satMod: 0.3, max: 64 },
-  cooked_meat: { food: 6, satMod: 0.8, max: 64 },
-  coal: { fuel: 80, max: 64 },
-  raw_iron: { max: 64 },
-  raw_gold: { max: 64 },
-  iron_ingot: { max: 64 },
-  gold_ingot: { max: 64 },
-  emerald: { money: 1, max: 64 },
-  wood_pickaxe: { tool: "pickaxe", tier: 1, dur: 59, max: 1 },
-  wood_axe: { tool: "axe", tier: 1, dur: 59, max: 1 },
-  wood_shovel: { tool: "shovel", tier: 1, dur: 59, max: 1 },
-  stone_pickaxe: { tool: "pickaxe", tier: 2, dur: 131, max: 1 },
-  stone_axe: { tool: "axe", tier: 2, dur: 131, max: 1 },
-  stone_shovel: { tool: "shovel", tier: 2, dur: 131, max: 1 },
-  iron_pickaxe: { tool: "pickaxe", tier: 3, dur: 250, max: 1 },
-  iron_axe: { tool: "axe", tier: 3, dur: 250, max: 1 },
-  iron_shovel: { tool: "shovel", tier: 3, dur: 250, max: 1 },
-  sword: { weapon: 5, dur: 200, max: 1 },
+  dirt: { block: BLOCK.DIRT, max: 64 }, sand: { block: BLOCK.SAND, max: 64 }, snow: { block: BLOCK.SNOW, max: 64 }, cobble: { block: BLOCK.COBBLE, max: 64 }, log: { block: BLOCK.LOG, max: 64 }, plank: { block: BLOCK.PLANK, max: 64 }, stick: { max: 64, fuel: 5 }, glass: { block: BLOCK.GLASS, max: 64 }, torch: { block: BLOCK.TORCH, max: 64 }, chest: { block: BLOCK.CHEST, max: 64 }, furnace: { block: BLOCK.FURNACE, max: 64 }, crafting_table: { block: BLOCK.CRAFT, max: 64 }, enchant_table: { block: BLOCK.ENCHANT, max: 64 }, rail: { block: BLOCK.RAIL, max: 64 }, tnt: { block: BLOCK.TNT, max: 64 }, door: { block: BLOCK.DOOR, max: 64 }, switch: { block: BLOCK.SWITCH, max: 64 }, piston: { block: BLOCK.PISTON, max: 64 }, obsidian: { block: BLOCK.OBS, max: 64 }, redstone: { block: BLOCK.RED, max: 64 }, portal: { block: BLOCK.PORTAL, max: 64 }, seed: { crop: 1, max: 64 }, wheat: { food: 2, max: 64 }, bread: { food: 5, max: 64 }, raw_meat: { food: 1, max: 64 }, cooked_meat: { food: 6, max: 64 }, coal: { fuel: 80, max: 64 }, raw_iron: { max: 64 }, raw_gold: { max: 64 }, iron_ingot: { max: 64 }, gold_ingot: { max: 64 }, emerald: { money: 1, max: 64 }, boat_item: { vehicle: "boat", max: 1 }, minecart_item: { vehicle: "cart", max: 1 }, wood_pickaxe: { tool: "pickaxe", tier: 1, dur: 59, max: 1 }, wood_axe: { tool: "axe", tier: 1, dur: 59, max: 1 }, wood_shovel: { tool: "shovel", tier: 1, dur: 59, max: 1 }, stone_pickaxe: { tool: "pickaxe", tier: 2, dur: 131, max: 1 }, stone_axe: { tool: "axe", tier: 2, dur: 131, max: 1 }, stone_shovel: { tool: "shovel", tier: 2, dur: 131, max: 1 }, iron_pickaxe: { tool: "pickaxe", tier: 3, dur: 250, max: 1 }, iron_axe: { tool: "axe", tier: 3, dur: 250, max: 1 }, iron_shovel: { tool: "shovel", tier: 3, dur: 250, max: 1 }, sword: { weapon: 5, dur: 200, max: 1 },
 };
 
 const RECIPES = [
-  { in: { log: 1 }, out: { id: "plank", c: 4 } },
-  { in: { plank: 2 }, out: { id: "stick", c: 4 } },
-  { in: { plank: 4 }, out: { id: "crafting_table", c: 1 } },
-  { in: { plank: 8 }, out: { id: "chest", c: 1 } },
-  { in: { cobble: 8 }, out: { id: "furnace", c: 1 } },
-  { in: { plank: 3, stick: 2 }, out: { id: "wood_pickaxe", c: 1 } },
-  { in: { plank: 3, stick: 2 }, out: { id: "wood_axe", c: 1 } },
-  { in: { plank: 1, stick: 2 }, out: { id: "wood_shovel", c: 1 } },
-  { in: { cobble: 3, stick: 2 }, out: { id: "stone_pickaxe", c: 1 } },
-  { in: { cobble: 3, stick: 2 }, out: { id: "stone_axe", c: 1 } },
-  { in: { cobble: 1, stick: 2 }, out: { id: "stone_shovel", c: 1 } },
-  { in: { coal: 1, stick: 1 }, out: { id: "torch", c: 4 } },
-  { in: { wheat: 3 }, out: { id: "bread", c: 1 } },
-  { in: { plank: 6 }, out: { id: "door", c: 1 } },
+  { in: { log: 1 }, out: { id: "plank", c: 4 } }, { in: { plank: 2 }, out: { id: "stick", c: 4 } }, { in: { plank: 4 }, out: { id: "crafting_table", c: 1 } }, { in: { plank: 8 }, out: { id: "chest", c: 1 } }, { in: { cobble: 8 }, out: { id: "furnace", c: 1 } }, { in: { obsidian: 4, gold_ingot: 2 }, out: { id: "enchant_table", c: 1 } }, { in: { plank: 3, stick: 2 }, out: { id: "wood_pickaxe", c: 1 } }, { in: { plank: 3, stick: 2 }, out: { id: "wood_axe", c: 1 } }, { in: { plank: 1, stick: 2 }, out: { id: "wood_shovel", c: 1 } }, { in: { cobble: 3, stick: 2 }, out: { id: "stone_pickaxe", c: 1 } }, { in: { cobble: 3, stick: 2 }, out: { id: "stone_axe", c: 1 } }, { in: { cobble: 1, stick: 2 }, out: { id: "stone_shovel", c: 1 } }, { in: { coal: 1, stick: 1 }, out: { id: "torch", c: 4 } }, { in: { wheat: 3 }, out: { id: "bread", c: 1 } }, { in: { plank: 6 }, out: { id: "door", c: 1 } }, { in: { iron_ingot: 2, stick: 1 }, out: { id: "rail", c: 4 } }, { in: { plank: 3, cobble: 4, iron_ingot: 1, redstone: 1 }, out: { id: "piston", c: 1 } }, { in: { cobble: 1, stick: 1 }, out: { id: "switch", c: 1 } }, { in: { sand: 4, coal: 2, redstone: 1 }, out: { id: "tnt", c: 1 } }, { in: { plank: 5 }, out: { id: "boat_item", c: 1 } }, { in: { iron_ingot: 5 }, out: { id: "minecart_item", c: 1 } },
 ];
 
 const SMELT = { raw_iron: "iron_ingot", raw_gold: "gold_ingot", sand: "glass", raw_meat: "cooked_meat" };
@@ -431,27 +340,11 @@ const mk = (id = null, c = 0, d = 0, e = null) => ({ id, c, d, e });
 class Inventory {
   constructor() { this.s = Array.from({ length: 36 }, () => mk()); this.sel = 0; }
   json() { return { s: this.s, sel: this.sel }; }
-  load(v) {
-    if (!v) return;
-    this.s = (v.s || []).map((x) => {
-      const s = { ...mk(), ...x };
-      if (!s.id || !ITEM[s.id]) return mk();
-      return s;
-    });
-    while (this.s.length < 36) this.s.push(mk());
-    this.sel = clamp(v.sel || 0, 0, 8);
-  }
+  load(v) { if (!v) return; this.s = (v.s || []).map((x) => ({ ...mk(), ...x })); while (this.s.length < 36) this.s.push(mk()); this.sel = clamp(v.sel || 0, 0, 8); }
   max(id) { return ITEM[id]?.max || 64; }
   count(id) { return this.s.reduce((a, b) => a + (b.id === id ? b.c : 0), 0); }
   has(req) { return Object.entries(req).every(([k, c]) => this.count(k) >= c); }
-  add(id, c = 1) {
-    if (!ITEM[id]) return c;
-    const m = this.max(id);
-    let left = c;
-    for (const s of this.s) if (s.id === id && s.c < m) { const a = Math.min(left, m - s.c); s.c += a; left -= a; if (!left) return 0; }
-    for (const s of this.s) if (!s.id) { const a = Math.min(left, m); s.id = id; s.c = a; s.d = ITEM[id]?.dur || 0; left -= a; if (!left) return 0; }
-    return left;
-  }
+  add(id, c = 1) { const m = this.max(id); let left = c; for (const s of this.s) if (s.id === id && s.c < m) { const a = Math.min(left, m - s.c); s.c += a; left -= a; if (!left) return 0; } for (const s of this.s) if (!s.id) { const a = Math.min(left, m); s.id = id; s.c = a; s.d = ITEM[id]?.dur || 0; left -= a; if (!left) return 0; } return left; }
   take(id, c = 1) { if (this.count(id) < c) return 0; let left = c; for (const s of this.s) { if (s.id !== id) continue; const t = Math.min(left, s.c); s.c -= t; left -= t; if (s.c <= 0) Object.assign(s, mk()); if (!left) break; } return c; }
   consume(req) { if (!this.has(req)) return false; Object.entries(req).forEach(([k, c]) => this.take(k, c)); return true; }
   useSel() { const s = this.s[this.sel]; if (!s.id) return null; s.c -= 1; const id = s.id; if (s.c <= 0) Object.assign(s, mk()); return id; }
@@ -481,11 +374,10 @@ class World {
     this.fluidLimit = 220;
     this.decayLimit = 100;
     this.fireLimit = 100;
-    this.genStructures = true;
     this.grassTexReq = 0;
     this.grassTexWarned = 0;
     this.atlas = buildAtlas(PACKS[this.pack] ? this.pack : "classic");
-    this.applyGrassTextures();
+    this.textureReady = this.applyGrassTextures();
   }
   ck(cx, cz) { return `${cx},${cz}`; }
   bk(x, y, z) { return `${x},${y},${z}`; }
@@ -498,44 +390,54 @@ class World {
         console.warn("[WebCraft] Custom block textures require http(s) hosting. file:// taints canvas for WebGL. Run a local server (for example: `python -m http.server 8080`) and open http://localhost:8080/");
         this.grassTexWarned = 1;
       }
-      return;
+      const ready = Promise.resolve({ fileProtocol: 1 });
+      this.textureReady = ready;
+      return ready;
     }
     const req = ++this.grassTexReq;
     const atlas = this.atlas;
-    Promise.all(CUSTOM_TILE_TEXTURE_KEYS.map((k) => loadImageFromUrls(textureUrlsForKey(k)))).then((results) => {
-      if (req !== this.grassTexReq || atlas !== this.atlas) return;
-      let changed = false;
-      const loaded = {};
-      for (let i = 0; i < CUSTOM_TILE_TEXTURE_KEYS.length; i++) {
-        const key = CUSTOM_TILE_TEXTURE_KEYS[i];
-        const res = results[i];
-        loaded[key] = res.url;
-        if (res.img) changed = drawAtlasTileImage(atlas, key, res.img) || changed;
-      }
-      const missing = CUSTOM_TILE_TEXTURE_KEYS.filter((_, i) => !results[i].img);
-      if (missing.length) {
-        if (!this.grassTexWarned) {
-          const tried = Object.fromEntries(missing.map((key) => [key, textureUrlsForKey(key)]));
-          console.warn("[WebCraft] Some custom block textures were not found. Using generated fallback for missing keys.", {
-            loaded,
-            missing,
-            tried,
-          });
-          this.grassTexWarned = 1;
+    const ready = Promise.all(CUSTOM_TILE_TEXTURE_KEYS.map((k) => loadImageFromUrls(textureUrlsForKey(k))))
+      .then((results) => {
+        if (req !== this.grassTexReq || atlas !== this.atlas) return { stale: 1 };
+        let changed = false;
+        const loaded = {};
+        for (let i = 0; i < CUSTOM_TILE_TEXTURE_KEYS.length; i++) {
+          const key = CUSTOM_TILE_TEXTURE_KEYS[i];
+          const res = results[i];
+          loaded[key] = res.url;
+          if (res.img) changed = drawAtlasTileImage(atlas, key, res.img) || changed;
         }
-      } else {
-        this.grassTexWarned = 0;
-        console.info("[WebCraft] Custom block textures loaded.", { loaded });
-      }
-      if (changed) atlas.texture.needsUpdate = true;
-      // Ensure visible update even on drivers/caches that don't refresh atlas-bound materials immediately.
-      if (changed) for (const k of this.loaded) this.rebuildKey(k);
-    });
+        const missing = CUSTOM_TILE_TEXTURE_KEYS.filter((_, i) => !results[i].img);
+        if (missing.length) {
+          if (!this.grassTexWarned) {
+            const tried = Object.fromEntries(missing.map((key) => [key, textureUrlsForKey(key)]));
+            console.warn("[WebCraft] Some custom block textures were not found. Using generated fallback for missing keys.", {
+              loaded,
+              missing,
+              tried,
+            });
+            this.grassTexWarned = 1;
+          }
+        } else {
+          this.grassTexWarned = 0;
+          console.info("[WebCraft] Custom block textures loaded.", { loaded });
+        }
+        if (changed) atlas.texture.needsUpdate = true;
+        // Ensure visible update even on drivers/caches that don't refresh atlas-bound materials immediately.
+        if (changed) for (const k of this.loaded) this.rebuildKey(k);
+        return { changed, missing, loaded };
+      })
+      .catch((err) => {
+        console.warn("[WebCraft] Texture loading failed; using generated fallback tiles.", err);
+        return { error: 1 };
+      });
+    this.textureReady = ready;
+    return ready;
   }
   setPack(p) {
     this.pack = (typeof p === "string" && p.trim()) ? p.trim() : "classic";
     this.atlas = buildAtlas(PACKS[this.pack] ? this.pack : "classic");
-    this.applyGrassTextures();
+    this.textureReady = this.applyGrassTextures();
     for (const k of this.loaded) this.rebuildKey(k);
   }
   setRD(v) { this.rd = clamp(Math.round(v), 2, MAX_RD); }
@@ -546,9 +448,6 @@ class World {
     if (o.decayLimit !== undefined) this.decayLimit = clamp(Math.floor(o.decayLimit), 20, 200);
     if (o.fireLimit !== undefined) this.fireLimit = clamp(Math.floor(o.fireLimit), 20, 200);
   }
-  setWorldOptions(o = {}) {
-    if (o.structures !== undefined) this.genStructures = !!o.structures;
-  }
   ensure(cx, cz) {
     const k = this.ck(cx, cz);
     if (!this.cd.has(k)) this.cd.set(k, this.gen(cx, cz));
@@ -557,8 +456,7 @@ class World {
   get(x, y, z) {
     if (y < 0 || y >= WORLD_H) return BLOCK.AIR;
     const [cx, cz] = this.cc(x, z), c = this.ensure(cx, cz);
-    const id = c.b[this.idx(this.lc(x), y, this.lc(z))];
-    return DISABLED_BLOCK_IDS.has(id) ? BLOCK.AIR : id;
+    return c.b[this.idx(this.lc(x), y, this.lc(z))];
   }
   gd(x, y, z) {
     if (y < 0 || y >= WORLD_H) return 0;
@@ -574,7 +472,6 @@ class World {
   }
   set(x, y, z, id, o = {}) {
     if (y < 0 || y >= WORLD_H) return;
-    if (DISABLED_BLOCK_IDS.has(id)) id = BLOCK.AIR;
     const [cx, cz] = this.cc(x, z), c = this.ensure(cx, cz), i = this.idx(this.lc(x), y, this.lc(z));
     c.b[i] = id;
     if (o.data !== undefined) c.d[i] = o.data;
@@ -621,7 +518,7 @@ class World {
       hm[lx + CHUNK * lz] = h;
       for (let y = 0; y <= h; y++) {
         let id = BLOCK.STONE;
-        if (this.dimension === "nether") id = BLOCK.STONE;
+        if (this.dimension === "nether") id = y >= h - 1 ? BLOCK.OBS : BLOCK.STONE;
         else if (bio === "desert") id = y === h ? BLOCK.SAND : y > h - 4 ? BLOCK.SAND : BLOCK.STONE;
         else if (bio === "snow") id = y === h ? BLOCK.SNOW : y > h - 4 ? BLOCK.DIRT : BLOCK.STONE;
         else id = y === h ? BLOCK.GRASS : y > h - 4 ? BLOCK.DIRT : BLOCK.STONE;
@@ -655,22 +552,13 @@ class World {
         if (id === BLOCK.AIR || id === BLOCK.WATER || id === BLOCK.LAVA) c.b[ii] = y >= h - 4 ? topFill : BLOCK.STONE;
       }
     }
-    if (this.genStructures) {
-      if (r01(cx, 0, cz, this.seed + 900) < 0.02 && this.dimension !== "nether") this.dungeon(c);
-      if (r01(cx, 1, cz, this.seed + 901) < 0.012 && this.dimension !== "nether") this.village(c);
-      if (r01(cx, 2, cz, this.seed + 905) < 0.006) this.egg(c);
-    }
+    if (r01(cx, 0, cz, this.seed + 900) < 0.02 && this.dimension !== "nether") this.dungeon(c);
+    if (r01(cx, 1, cz, this.seed + 901) < 0.012 && this.dimension !== "nether") this.village(c);
+    if (r01(cx, 2, cz, this.seed + 905) < 0.006) this.egg(c);
     this.applyMod(c);
     return c;
   }
-  top(c, lx, lz) {
-    for (let y = WORLD_H - 1; y >= 0; y--) {
-      const raw = c.b[this.idx(lx, y, lz)];
-      const id = DISABLED_BLOCK_IDS.has(raw) ? BLOCK.AIR : raw;
-      if (id !== BLOCK.AIR && id !== BLOCK.WATER && id !== BLOCK.LAVA && id !== BLOCK.LEAF) return y;
-    }
-    return 0;
-  }
+  top(c, lx, lz) { for (let y = WORLD_H - 1; y >= 0; y--) { const id = c.b[this.idx(lx, y, lz)]; if (id !== BLOCK.AIR && id !== BLOCK.WATER && id !== BLOCK.LAVA && id !== BLOCK.LEAF) return y; } return 0; }
   tree(c, lx, y, lz) {
     const h = 4 + Math.floor(r01(lx, y, lz, this.seed + 1001) * 3); if (y + h + 2 >= WORLD_H) return;
     for (let i = 0; i < h; i++) c.b[this.idx(lx, y + i, lz)] = BLOCK.LOG;
@@ -709,7 +597,7 @@ class World {
   }
   egg(c) {
     const x = 8, z = 8, y = this.top(c, x, z) + 1;
-    for (let i = 0; i < 4; i++) c.b[this.idx(x, y + i, z)] = BLOCK.COBBLE;
+    for (let i = 0; i < 4; i++) c.b[this.idx(x, y + i, z)] = BLOCK.OBS;
     if (y + 4 < WORLD_H) {
       c.b[this.idx(x, y + 4, z)] = BLOCK.CHEST;
       const key = this.bk(c.cx * CHUNK + x, y + 4, c.cz * CHUNK + z);
@@ -721,10 +609,7 @@ class World {
     for (let lx = 0; lx < CHUNK; lx++) for (let lz = 0; lz < CHUNK; lz++) for (let y = 0; y < WORLD_H; y++) {
       const m = this.mod.get(this.bk(bx + lx, y, bz + lz));
       if (!m) continue;
-      const i = this.idx(lx, y, lz);
-      const id = DISABLED_BLOCK_IDS.has(m.id) ? BLOCK.AIR : m.id;
-      c.b[i] = id;
-      c.d[i] = m.d || 0;
+      const i = this.idx(lx, y, lz); c.b[i] = m.id; c.d[i] = m.d || 0;
     }
   }
   rebuildNear(x, y, z) {
@@ -769,19 +654,14 @@ class World {
     const pal = PACKS[this.pack] || PACKS.classic;
     const bx = c.cx * CHUNK, bz = c.cz * CHUNK;
     for (let lx = 0; lx < CHUNK; lx++) for (let lz = 0; lz < CHUNK; lz++) for (let y = 0; y < WORLD_H; y++) {
-      const raw = c.b[this.idx(lx, y, lz)];
-      const id = DISABLED_BLOCK_IDS.has(raw) ? BLOCK.AIR : raw; if (id === BLOCK.AIR) continue;
-      const d = DEF[id] || DEF[BLOCK.AIR], w = d.trans || d.liquid || d.plant || d.rail || id === BLOCK.TORCH || id === LEGACY_BLOCK.RED;
+      const id = c.b[this.idx(lx, y, lz)]; if (id === BLOCK.AIR) continue;
+      const d = DEF[id] || DEF[BLOCK.AIR], w = d.trans || d.liquid || d.plant || d.rail || id === BLOCK.TORCH || id === BLOCK.RED;
       const b = w ? t : o;
       const x = bx + lx, z = bz + lz, key = COLOR_KEY[id] || "stone";
-      const noTint =
-        id === BLOCK.GRASS || id === BLOCK.DIRT || id === BLOCK.STONE || id === BLOCK.SAND || id === BLOCK.SNOW ||
-        id === BLOCK.LOG || id === BLOCK.LEAF || id === BLOCK.GLASS || id === BLOCK.COAL || id === BLOCK.IRON ||
-        id === BLOCK.GOLD || id === BLOCK.PLANK || id === BLOCK.COBBLE || id === BLOCK.CRAFT ||
-        id === BLOCK.FURNACE || id === BLOCK.CHEST || id === BLOCK.TORCH || id === BLOCK.DOOR;
+      const noTint = id === BLOCK.GRASS || id === BLOCK.DIRT || id === BLOCK.STONE || id === BLOCK.SAND || id === BLOCK.SNOW || id === BLOCK.LOG || id === BLOCK.LEAF;
       const baseHex = noTint ? 0xffffff : (pal[key] || 0xffffff);
       const col = new THREE.Color(baseHex);
-      if (d.plant || d.rail || id === BLOCK.TORCH || id === LEGACY_BLOCK.RED) {
+      if (d.plant || d.rail || id === BLOCK.TORCH || id === BLOCK.RED) {
         const uv = this.atlas.uvFor(key);
         const uvTri = [[uv.u0, uv.v0], [uv.u0, uv.v1], [uv.u1, uv.v1], [uv.u0, uv.v0], [uv.u1, uv.v1], [uv.u1, uv.v0]];
         const planes = [[[0, 0, 0], [1, 1, 1], [1, 0, 1], [0, 1, 0]], [[1, 0, 0], [0, 1, 1], [0, 0, 1], [1, 1, 0]]];
@@ -806,21 +686,6 @@ class World {
           else faceKey = "grassside";
         } else if (id === BLOCK.LOG) {
           faceKey = f.d[1] !== 0 ? "logtopandbottom" : "logside";
-        } else if (id === BLOCK.CRAFT) {
-          if (f.d[1] !== 0) faceKey = "crafttop";
-          else if (f.d[2] > 0) faceKey = "craftfront";
-          else faceKey = "craftside";
-        } else if (id === BLOCK.FURNACE) {
-          if (f.d[1] !== 0) faceKey = "furnacetopandbottom";
-          else if (f.d[2] > 0) faceKey = "furnacefrontoff";
-          else faceKey = "furnaceside";
-        } else if (id === BLOCK.CHEST) {
-          if (f.d[1] !== 0) faceKey = "chesttop";
-          else if (f.d[2] > 0) faceKey = "chestfront";
-          else if (f.d[2] < 0) faceKey = "chestback";
-          else faceKey = "chestside";
-        } else if (id === BLOCK.DOOR) {
-          faceKey = f.d[1] > 0 ? "doortop" : "doorbottom";
         }
         const uv = this.atlas.uvFor(faceKey);
         const uvTri = [[uv.u0, uv.v0], [uv.u0, uv.v1], [uv.u1, uv.v1], [uv.u0, uv.v0], [uv.u1, uv.v1], [uv.u1, uv.v0]];
@@ -849,9 +714,7 @@ class World {
     if (lim <= 0) { this.cl.set(k, []); return; }
     const out = []; let n = 0;
     for (let lx = 0; lx < CHUNK && n < lim; lx++) for (let lz = 0; lz < CHUNK && n < lim; lz++) for (let y = 1; y < WORLD_H - 1 && n < lim; y++) {
-      const raw = c.b[this.idx(lx, y, lz)];
-      const id = DISABLED_BLOCK_IDS.has(raw) ? BLOCK.AIR : raw;
-      const lv = DEF[id]?.light || 0; if (lv <= 0) continue;
+      const id = c.b[this.idx(lx, y, lz)], lv = DEF[id]?.light || 0; if (lv <= 0) continue;
       const l = new THREE.PointLight(id === BLOCK.LAVA ? 0xff7722 : 0xffe29b, 0.35 + lv / 18, 8 + lv);
       l.position.set(c.cx * CHUNK + lx + 0.5, y + 0.6, c.cz * CHUNK + lz + 0.5);
       out.push(l); this.scene.add(l); n++;
@@ -915,7 +778,7 @@ class World {
     for (const d of [[0, -1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]]) {
       const nx = x + d[0], ny = y + d[1], nz = z + d[2]; if (ny < 1 || ny >= WORLD_H - 1) continue;
       const nid = this.get(nx, ny, nz);
-      if ((id === BLOCK.WATER && nid === BLOCK.LAVA) || (id === BLOCK.LAVA && nid === BLOCK.WATER)) { this.set(nx, ny, nz, BLOCK.STONE, { data: 0, mod: 1 }); continue; }
+      if ((id === BLOCK.WATER && nid === BLOCK.LAVA) || (id === BLOCK.LAVA && nid === BLOCK.WATER)) { this.set(nx, ny, nz, ny < y ? BLOCK.OBS : BLOCK.STONE, { data: 0, mod: 1 }); continue; }
       if (nid !== BLOCK.AIR && !DEF[nid]?.repl) continue;
       const nl = d[1] === -1 ? 1 : lv + 1; if (nl > lim) continue;
       this.set(nx, ny, nz, id, { data: nl, mod: 1 }); this.fluid.add(this.bk(nx, ny, nz));
@@ -952,11 +815,11 @@ class World {
       const cur = q.shift(); if (seen.has(cur.k)) continue; seen.add(cur.k);
       const [x, y, z] = cur.k.split(",").map(Number), id = this.get(x, y, z);
       if (id === BLOCK.DOOR) this.sd(x, y, z, cur.p > 0 ? 1 : 0);
-      if (id === LEGACY_BLOCK.PISTON && cur.p > 0) this.piston(x, y, z);
+      if (id === BLOCK.PISTON && cur.p > 0) this.piston(x, y, z);
       if (cur.p <= 0) continue;
       for (const d of [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, 1, 0], [0, -1, 0]]) {
         const nx = x + d[0], ny = y + d[1], nz = z + d[2], nid = this.get(nx, ny, nz);
-        if (nid === LEGACY_BLOCK.RED || nid === BLOCK.DOOR || nid === LEGACY_BLOCK.PISTON || nid === LEGACY_BLOCK.SWITCH) q.push({ k: this.bk(nx, ny, nz), p: cur.p - 1 });
+        if (nid === BLOCK.RED || nid === BLOCK.DOOR || nid === BLOCK.PISTON || nid === BLOCK.SWITCH) q.push({ k: this.bk(nx, ny, nz), p: cur.p - 1 });
       }
     }
   }
@@ -971,7 +834,7 @@ class World {
     this.pack = typeof v.pack === "string" && PACKS[v.pack] ? v.pack : (PACKS[this.pack] ? this.pack : "classic");
     this.dimension = v.dim || this.dimension;
     this.atlas = buildAtlas(this.pack);
-    this.applyGrassTextures();
+    this.textureReady = this.applyGrassTextures();
     this.mod = new Map(v.mod || []);
     this.tile = new Map(v.tile || []);
     this.cd.clear();
@@ -1275,13 +1138,44 @@ class MobSys {
     m.legs[2].rotation.x = lerp(m.legs[2].rotation.x, targetB, blend);
     m.legs[3].rotation.x = lerp(m.legs[3].rotation.x, targetA, blend);
   }
+  uniqueMobMaterials(root) {
+    if (!root?.traverse) return;
+    const cloned = new Map();
+    const cloneMat = (mat) => {
+      if (!mat) return mat;
+      if (cloned.has(mat)) return cloned.get(mat);
+      const out = mat.clone();
+      cloned.set(mat, out);
+      return out;
+    };
+    root.traverse((node) => {
+      if (!node?.isMesh || !node.material) return;
+      if (Array.isArray(node.material)) node.material = node.material.map((m) => cloneMat(m));
+      else node.material = cloneMat(node.material);
+    });
+  }
+  setMobTint(m, strength) {
+    if (!m?.mesh?.traverse) return;
+    const s = clamp(strength, 0, 1);
+    m.mesh.traverse((node) => {
+      if (!node?.isMesh || !node.material) return;
+      const mats = Array.isArray(node.material) ? node.material : [node.material];
+      for (const mat of mats) {
+        if (!mat || !("emissive" in mat)) continue;
+        if (!mat.userData._baseEmissive) mat.userData._baseEmissive = mat.emissive.clone();
+        if (mat.userData._baseEmissiveIntensity === undefined) mat.userData._baseEmissiveIntensity = mat.emissiveIntensity ?? 1;
+        mat.emissive.copy(mat.userData._baseEmissive).lerp(new THREE.Color(0xff2a2a), s);
+        mat.emissiveIntensity = mat.userData._baseEmissiveIntensity + s * 0.7;
+      }
+    });
+  }
   spawnVehicle(t, p) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(t === "boat" ? 1.2 : 0.9, 0.4, t === "boat" ? 2 : 1.1), new THREE.MeshLambertMaterial({ color: t === "boat" ? 0x8b5b2f : 0x777777 }));
     mesh.castShadow = true; mesh.receiveShadow = true; mesh.position.copy(p); this.g.scene.add(mesh);
     const v = { t, p: p.clone(), vel: new THREE.Vector3(), mesh, rider: null }; this.v.push(v); return v;
   }
   spawnMob(t, p, o = {}) {
-    const m = { t, p: p.clone(), v: new THREE.Vector3(), g: 0, h: 10, mh: 10, sp: 2, cd: 0, path: [], pt: 0, wt: 0, data: {}, dead: 0 };
+    const m = { t, p: p.clone(), v: new THREE.Vector3(), g: 0, h: 10, mh: 10, sp: 2, cd: 0, path: [], pt: 0, wt: 0, data: {}, dead: 0, hitTint: 0, flee: 0, fleeDir: new THREE.Vector3(1, 0, 0) };
     if (t === "cow" || t === "sheep") { m.h = 8; m.mh = 8; m.sp = 1.3; }
     if (t === "zombie") { m.h = 14; m.mh = 14; m.sp = 2.1; }
     if (t === "skeleton") { m.h = 12; m.mh = 12; m.sp = 1.9; }
@@ -1303,6 +1197,7 @@ class MobSys {
       m.yOff = h / 2;
       m.tagY = h / 2 + 0.35;
     }
+    this.uniqueMobMaterials(m.mesh);
     m.mesh.position.copy(p).add(new THREE.Vector3(0, m.yOff, 0));
     const tg = this.tag(t === "trader" ? "Trader" : t); tg.position.set(0, m.tagY, 0); m.mesh.add(tg);
     this.g.scene.add(m.mesh); this.m.push(m); return m;
@@ -1322,7 +1217,11 @@ class MobSys {
     let dmg = s.id && ITEM[s.id]?.weapon ? ITEM[s.id].weapon : 2;
     if (s.e?.sharpness) dmg += s.e.sharpness;
     best.h -= dmg; this.g.p.at = 0.45; this.g.audio.play("hit"); this.g.pfx.burst(best.p.clone().add(new THREE.Vector3(0, 1, 0)), 0xff4444, 7, 2.2, 0.35);
-    this.g.addExhaustion(0.1);
+    best.hitTint = Math.max(best.hitTint || 0, 0.22);
+    best.flee = Math.max(best.flee || 0, 2.0);
+    best.fleeDir.copy(best.p).sub(this.g.p.pos).setY(0);
+    if (best.fleeDir.lengthSq() < 0.0001) best.fleeDir.set(Math.random() - 0.5, 0, Math.random() - 0.5);
+    best.fleeDir.normalize();
     if (s.id && ITEM[s.id]?.dur) { s.d -= 1; this.g.inv.cleanDur(); }
     if (best.h <= 0) { this.kill(best); this.g.xp(best.t === "golem" ? 25 : 6); }
     return 1;
@@ -1401,13 +1300,21 @@ class MobSys {
       const f = new THREE.Vector3(Math.sin(this.g.yaw), 0, Math.cos(this.g.yaw)), r = new THREE.Vector3(-f.z, 0, f.x);
       v.vel.x = (f.x * mv.z + r.x * mv.x) * 4; v.vel.z = (f.z * mv.z + r.z * mv.x) * 4;
       if (v.t === "boat") v.p.y = w.surface(Math.floor(v.p.x), Math.floor(v.p.z)) + 1.2;
-      else if (w.get(Math.floor(v.p.x), Math.floor(v.p.y - 0.7), Math.floor(v.p.z)) !== LEGACY_BLOCK.RAIL) v.vel.multiplyScalar(0.2);
+      else if (w.get(Math.floor(v.p.x), Math.floor(v.p.y - 0.7), Math.floor(v.p.z)) !== BLOCK.RAIL) v.vel.multiplyScalar(0.2);
       v.p.addScaledVector(v.vel, dt); v.mesh.position.copy(v.p); p.pos.copy(v.p).add(new THREE.Vector3(0, 1.1, 0));
     }
     for (let i = this.m.length - 1; i >= 0; i--) {
       const m = this.m[i]; if (m.dead) { this.m.splice(i, 1); continue; }
-      m.cd = Math.max(0, m.cd - dt); m.pt -= dt; m.wt -= dt;
-      if (m.t === "cow" || m.t === "sheep") {
+      m.cd = Math.max(0, m.cd - dt); m.pt -= dt; m.wt -= dt; m.hitTint = Math.max(0, (m.hitTint || 0) - dt);
+      if ((m.flee || 0) > 0) {
+        m.flee = Math.max(0, m.flee - dt);
+        const away = m.p.clone().sub(p.pos); away.y = 0;
+        if (away.lengthSq() < 0.0001) away.copy(m.fleeDir || new THREE.Vector3(1, 0, 0));
+        else m.fleeDir.copy(away);
+        away.normalize();
+        const fleeSp = clamp((m.sp || 1.5) * 1.45, 2.0, 3.5);
+        m.v.x = away.x * fleeSp; m.v.z = away.z * fleeSp;
+      } else if (m.t === "cow" || m.t === "sheep") {
         if (m.wt <= 0) { m.wt = 1 + Math.random() * 3; m.data.dir = new THREE.Vector2(Math.random() * 2 - 1, Math.random() * 2 - 1).normalize(); }
         m.v.x = (m.data.dir?.x || 0) * m.sp; m.v.z = (m.data.dir?.y || 0) * m.sp;
       } else if (m.t === "trader") m.v.set(0, 0, 0);
@@ -1432,6 +1339,7 @@ class MobSys {
       }
       m.v.y -= 18 * dt; this.move(m, dt, 0.35, m.t === "golem" ? 2.7 : 1.5);
       this.animateLegs(m, dt);
+      this.setMobTint(m, m.hitTint > 0 ? m.hitTint / 0.22 : 0);
       m.mesh.position.set(m.p.x, m.p.y + (m.yOff ?? (m.t === "golem" ? 1.4 : 0.8)), m.p.z);
       const tr = Math.atan2(m.v.x, m.v.z); if (Math.abs(m.v.x) + Math.abs(m.v.z) > 0.05) m.mesh.rotation.y = lerp(m.mesh.rotation.y, tr, 0.15);
       if (m.p.y < -15) this.kill(m);
@@ -1457,16 +1365,9 @@ class Game {
     };
     this.canvas = document.getElementById("game");
     this.r = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: this.perf.antialias, alpha: false });
-    this.r.autoClear = false;
     this.r.shadowMap.enabled = this.perf.shadows; this.r.shadowMap.type = THREE.PCFSoftShadowMap; this.r.setPixelRatio(Math.min(this.perf.pixelRatioMax, window.devicePixelRatio)); this.r.setSize(window.innerWidth, window.innerHeight);
     this.scene = new THREE.Scene(); this.scene.fog = new THREE.Fog(0xa7c8f9, 20, 170);
     this.cam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400);
-    this.scene.add(this.cam);
-    this.ui3dScene = new THREE.Scene();
-    this.ui3dCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 10);
-    this.ui3dCam.position.set(0, 0, 5);
-    this.ui3dCam.lookAt(0, 0, 0);
-    this.updateUi3dCamera();
     this.sky = new THREE.Mesh(new THREE.SphereGeometry(240, 24, 24), new THREE.MeshBasicMaterial({ color: 0x9ec9ff, side: THREE.BackSide })); this.scene.add(this.sky);
     this.sun = new THREE.DirectionalLight(0xffffff, 1.0); this.sun.position.set(20, 40, 20); this.sun.castShadow = this.perf.shadows; this.sun.shadow.mapSize.set(this.perf.low ? 512 : 1024, this.perf.low ? 512 : 1024); this.sun.shadow.camera.left = -80; this.sun.shadow.camera.right = 80; this.sun.shadow.camera.top = 80; this.sun.shadow.camera.bottom = -80; this.sun.shadow.camera.near = 1; this.sun.shadow.camera.far = 180; this.scene.add(this.sun);
     this.amb = new THREE.AmbientLight(0x88aacc, 0.45); this.scene.add(this.amb);
@@ -1478,127 +1379,16 @@ class Game {
     this.inv = new Inventory(); this.audio = new AudioSys(); this.pfx = new Particles(this.scene, this.perf.particles.scale, this.perf.particles.max); this.mobs = new MobSys(this); this.mobs.setPerf(this.perf.mobs);
     this.breakFx = this.mkBreakFx();
     this.p = { pos: new THREE.Vector3(8.5, 45, 8.5), vel: new THREE.Vector3(), g: 0, swim: 0, hp: 20, hu: 20, ox: 20, xp: 0, lv: 1, creative: 0, sprint: 0, at: 0, bt: null, bp: 0, fs: 0, mount: null, emo: 0, data: {} };
-    this.resetFoodState(20, 5);
     this.pm = this.playerModel(); this.scene.add(this.pm);
-    this.fpHand = this.firstPersonHand(); this.ui3dScene.add(this.fpHand);
-    this.fpHeldBlock = null;
-    this.fpHeldSig = "";
     this.yaw = 0; this.pitch = 0; this.third = 0;
-    this.keys = new Set(); this.md = { l: 0, r: 0 }; this.placeCd = 0; this.useCd = 0; this.foodCd = 0; this.step = 0; this.acc = 0; this.time = 6000; this.replay = []; this.replayGhost = null; this.replayOn = 0; this.achs = new Set(); this.items = []; this.plugins = window.WebCraftPlugins || [];
-    this.handSway = { x: 0, y: 0, vx: 0, vy: 0 };
-    this.itemIconCache = new Map();
-    this.invCraft = Array.from({ length: 4 }, () => mk());
+    this.keys = new Set(); this.md = { l: 0, r: 0 }; this.placeCd = 0; this.useCd = 0; this.foodCd = 0; this.step = 0; this.acc = 0; this.time = 6000; this.replay = []; this.replayGhost = null; this.replayOn = 0; this.achs = new Set(); this.chatOpen = 0; this.items = []; this.plugins = window.WebCraftPlugins || [];
     this.invCursor = mk(); this.invMouse = { x: -999, y: -999 };
     this.mapCd = 0; this.loadCd = 0;
-    this.newWorldCfg = { tab: "world", type: "default", structures: true, bonusChest: false, gamemode: "survival", difficulty: "normal", cheats: false, startTime: "day" };
+    this.worldLoadActive = false; this.worldLoadProgress = 0;
     this.perfAnnounced = false;
     this.ui = this.bindUI(); this.events(); this.setTitleSplash(); this.newWorld(Math.floor(Math.random() * 1e9), "slot1");
     if (MOBILE) { document.getElementById("touch-controls").classList.remove("hidden"); this.touch(); }
     this.last = performance.now(); requestAnimationFrame(this.loop.bind(this));
-  }
-  updateUi3dCamera() {
-    if (!this.ui3dCam) return;
-    const aspect = window.innerWidth / Math.max(1, window.innerHeight);
-    this.ui3dCam.left = -aspect;
-    this.ui3dCam.right = aspect;
-    this.ui3dCam.top = 1;
-    this.ui3dCam.bottom = -1;
-    this.ui3dCam.updateProjectionMatrix();
-  }
-  ensureFoodState() {
-    if (!this.p.food) {
-      const legacy = clamp(Math.floor(Number(this.p.hu) || 20), 0, 20);
-      this.p.food = { level: legacy, saturation: clamp(Math.min(5, legacy), 0, legacy), exhaustion: 0, tickTimer: 0 };
-    }
-    const f = this.p.food;
-    f.level = clamp(Math.floor(Number(f.level ?? this.p.hu ?? 20)), 0, 20);
-    f.saturation = clamp(Number(f.saturation ?? Math.min(5, f.level)), 0, f.level);
-    f.exhaustion = Math.max(0, Number(f.exhaustion ?? 0));
-    f.tickTimer = Math.max(0, Math.floor(Number(f.tickTimer ?? 0)));
-    this.p.hu = f.level;
-    return f;
-  }
-  resetFoodState(level = 20, saturation = 5) {
-    const l = clamp(Math.floor(Number(level) || 20), 0, 20);
-    this.p.food = { level: l, saturation: clamp(Number(saturation) || 0, 0, l), exhaustion: 0, tickTimer: 0 };
-    this.p.hu = this.p.food.level;
-  }
-  loadFoodState(v = {}) {
-    const lvl = clamp(Math.floor(Number(v?.food?.level ?? v?.hu ?? 20) || 20), 0, 20);
-    const satRaw = Number(v?.food?.saturation);
-    const sat = Number.isFinite(satRaw) ? satRaw : Math.min(5, lvl);
-    const ex = Math.max(0, Number(v?.food?.exhaustion ?? 0));
-    const tt = Math.max(0, Math.floor(Number(v?.food?.tickTimer ?? 0)));
-    this.p.food = { level: lvl, saturation: clamp(sat, 0, lvl), exhaustion: ex, tickTimer: tt };
-    this.p.hu = lvl;
-  }
-  addExhaustion(v = 0) {
-    if (this.p.creative || !Number.isFinite(v) || v <= 0) return;
-    const f = this.ensureFoodState();
-    f.exhaustion += v;
-    while (f.exhaustion >= 4) {
-      f.exhaustion -= 4;
-      if (f.saturation > 0) f.saturation = Math.max(0, f.saturation - 1);
-      else if (f.level > 0) f.level -= 1;
-      if (f.saturation > f.level) f.saturation = f.level;
-    }
-    this.p.hu = f.level;
-  }
-  foodRestore(it) {
-    if (!it?.food) return null;
-    const food = clamp(Math.floor(Number(it.food) || 0), 0, 20);
-    const sat = Number.isFinite(it.sat) ? it.sat : food * ((Number.isFinite(it.satMod) ? it.satMod : 0.6) * 2);
-    return { food, sat: Math.max(0, sat) };
-  }
-  hungerTick() {
-    const f = this.ensureFoodState();
-    const difficulty = (this.p.data?.difficulty || "normal").toLowerCase();
-    if (difficulty === "peaceful") {
-      f.level = 20;
-      f.saturation = Math.max(f.saturation, 5);
-      f.exhaustion = 0;
-      f.tickTimer += 1;
-      if (f.tickTimer >= 10) {
-        this.p.hp = Math.min(20, this.p.hp + 1);
-        f.tickTimer = 0;
-      }
-      this.p.hu = f.level;
-      return;
-    }
-    if (this.p.creative) {
-      this.p.hu = f.level;
-      f.tickTimer = 0;
-      return;
-    }
-    const naturalRegen = this.p.data?.naturalRegen !== false;
-    if (naturalRegen && this.p.hp < 20 && f.level >= 20 && f.saturation > 0) {
-      f.tickTimer += 1;
-      if (f.tickTimer >= 10) {
-        const heal = clamp((f.saturation / 6) * 2, 0, 2);
-        if (heal > 0) {
-          this.p.hp = Math.min(20, this.p.hp + heal);
-          this.addExhaustion((heal / 2) * 6);
-        }
-        f.tickTimer = 0;
-      }
-    } else if (naturalRegen && this.p.hp < 20 && f.level >= 18) {
-      f.tickTimer += 1;
-      if (f.tickTimer >= 80) {
-        const before = this.p.hp;
-        this.p.hp = Math.min(20, this.p.hp + 2);
-        if (this.p.hp > before) this.addExhaustion(6);
-        f.tickTimer = 0;
-      }
-    } else if (f.level <= 0) {
-      f.tickTimer += 1;
-      if (f.tickTimer >= 80) {
-        const minHp = difficulty === "easy" ? 10 : difficulty === "normal" ? 1 : 0;
-        if (this.p.hp > minHp) this.damage(2, "starvation");
-        f.tickTimer = 0;
-      }
-    } else f.tickTimer = 0;
-    if (f.saturation > f.level) f.saturation = f.level;
-    this.p.hu = f.level;
   }
   mkCrackTex(stage) {
     const size = 64, c = document.createElement("canvas");
@@ -1670,222 +1460,29 @@ class Game {
     const m = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.35), new THREE.MeshLambertMaterial({ color: 0xd5a07a }));
     m.castShadow = true; m.receiveShadow = true; const tg = this.mobs.tag("You"); tg.position.set(0, 1.35, 0); m.add(tg); return m;
   }
-  redrawFirstPersonHandTexture(baseColor = 0xd5a07a) {
-    if (!this.fpHandCanvas) return;
-    const toHex = (v) => {
-      if (typeof v === "number" && Number.isFinite(v)) return v >>> 0;
-      if (typeof v === "string") {
-        const n = Number.parseInt(v.replace("#", ""), 16);
-        if (Number.isFinite(n)) return n >>> 0;
-      }
-      return 0xd5a07a;
-    };
-    const scaleHex = (hex, m) => {
-      const rgb = hexRGB(hex);
-      const r = clamp(Math.floor(rgb.r * m), 0, 255);
-      const g = clamp(Math.floor(rgb.g * m), 0, 255);
-      const b = clamp(Math.floor(rgb.b * m), 0, 255);
-      return (r << 16) | (g << 8) | b;
-    };
-    const fill = (ctx, x, y, w, h, hex) => {
-      ctx.fillStyle = `#${hex.toString(16).padStart(6, "0")}`;
-      ctx.fillRect(x, y, w, h);
-    };
-    const base = toHex(baseColor);
-    const light = scaleHex(base, 1.12);
-    const dark = scaleHex(base, 0.86);
-    const deep = scaleHex(base, 0.74);
-    const ctx = this.fpHandCanvas.getContext("2d");
-    ctx.clearRect(0, 0, 16, 16);
-    fill(ctx, 0, 0, 16, 16, base);
-    // Left bevel and blocky shadows to mimic the Minecraft hand texture style.
-    fill(ctx, 0, 0, 4, 16, light);
-    fill(ctx, 2, 1, 2, 5, dark);
-    fill(ctx, 2, 11, 2, 4, dark);
-    fill(ctx, 6, 2, 4, 3, dark);
-    fill(ctx, 6, 6, 4, 5, dark);
-    fill(ctx, 11, 9, 3, 7, dark);
-    fill(ctx, 8, 3, 2, 2, deep);
-    fill(ctx, 7, 8, 2, 3, deep);
-    fill(ctx, 11, 12, 2, 3, deep);
-    if (this.fpHandTexture) this.fpHandTexture.needsUpdate = true;
-  }
-  firstPersonHand() {
-    const g = new THREE.Group();
-    this.fpHandCanvas = document.createElement("canvas");
-    this.fpHandCanvas.width = 16;
-    this.fpHandCanvas.height = 16;
-    this.redrawFirstPersonHandTexture(0xd5a07a);
-    this.fpHandTexture = new THREE.CanvasTexture(this.fpHandCanvas);
-    this.fpHandTexture.magFilter = THREE.NearestFilter;
-    this.fpHandTexture.minFilter = THREE.NearestFilter;
-    this.fpHandTexture.generateMipmaps = false;
-    const skin = new THREE.MeshBasicMaterial({ map: this.fpHandTexture, color: 0xffffff, depthTest: false, depthWrite: false });
-    // Forward-facing HUD arm: thicker and longer toward view direction.
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.72, 1.55), skin);
-    arm.position.set(0, -0.1, -0.28);
-    arm.frustumCulled = false;
-    g.add(arm);
-    g.visible = false;
-    g.renderOrder = 45;
-    this.fpHandSkin = skin;
-    return g;
-  }
-  heldBlockFaceKey(id, faceDir) {
-    if (id === BLOCK.GRASS) {
-      if (faceDir[1] > 0) return "grasstop";
-      if (faceDir[1] < 0) return "dirt";
-      return "grassside";
-    }
-    if (id === BLOCK.LOG) return faceDir[1] !== 0 ? "logtopandbottom" : "logside";
-    return COLOR_KEY[id] || "stone";
-  }
-  clearHeldBlockInHand() {
-    if (!this.fpHeldBlock) return;
-    if (this.fpHeldBlock.parent) this.fpHeldBlock.parent.remove(this.fpHeldBlock);
-    if (this.fpHeldBlock.geometry) this.fpHeldBlock.geometry.dispose();
-    if (this.fpHeldBlock.material) this.fpHeldBlock.material.dispose();
-    this.fpHeldBlock = null;
-  }
-  createHeldBlockMesh(blockId) {
-    const atlas = this.world?.atlas;
-    if (!atlas?.texture) return null;
-    const pos = [], nor = [], uv = [];
-    for (const f of FACE) {
-      const key = this.heldBlockFaceKey(blockId, f.d);
-      const tile = atlas.uvFor(key);
-      const uvTri = [[tile.u0, tile.v0], [tile.u0, tile.v1], [tile.u1, tile.v1], [tile.u0, tile.v0], [tile.u1, tile.v1], [tile.u1, tile.v0]];
-      const v = [f.c[0], f.c[1], f.c[2], f.c[0], f.c[2], f.c[3]];
-      for (let i = 0; i < v.length; i++) {
-        const q = v[i];
-        pos.push(q[0], q[1], q[2]);
-        nor.push(f.d[0], f.d[1], f.d[2]);
-        uv.push(uvTri[i][0], uvTri[i][1]);
-      }
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-    g.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
-    g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
-    const m = new THREE.MeshBasicMaterial({ map: atlas.texture, color: 0xffffff, transparent: true, alphaTest: 0.05, depthTest: false, depthWrite: false, toneMapped: false });
-    const mesh = new THREE.Mesh(g, m);
-    mesh.frustumCulled = false;
-    mesh.renderOrder = 46;
-    // Place held block near the top-left knuckle area of the first-person hand.
-    mesh.position.set(-0.34, 0.82, -0.62);
-    mesh.rotation.set(0.28, -0.22, 0.08);
-    mesh.scale.set(0.32, 0.32, 0.32);
-    return mesh;
-  }
-  syncHeldBlockInHand(force = false) {
-    if (!this.fpHand) return;
-    const s = this.inv?.selSlot?.();
-    const blockId = s?.id ? ITEM[s.id]?.block : null;
-    const tex = this.world?.atlas?.texture;
-    const sig = `${blockId || 0}|${tex?.uuid || "none"}`;
-    if (!force && sig === this.fpHeldSig) return;
-    this.clearHeldBlockInHand();
-    this.fpHeldSig = sig;
-    if (!blockId || !tex) return;
-    this.fpHeldBlock = this.createHeldBlockMesh(blockId);
-    if (this.fpHeldBlock) this.fpHand.add(this.fpHeldBlock);
-  }
   bindUI() {
     const u = {
-      healthFill: document.getElementById("health-fill"), hungerFill: document.getElementById("hunger-fill"), xpFill: document.getElementById("xp-fill"), oxygenFill: document.getElementById("oxygen-fill"), healthText: document.getElementById("health-text"), hungerText: document.getElementById("hunger-text"), xpText: document.getElementById("xp-text"), oxygenText: document.getElementById("oxygen-text"), modePill: document.getElementById("mode-pill"), coords: document.getElementById("coords"), clock: document.getElementById("clock"), hotbar: document.getElementById("hotbar"), hint: document.getElementById("interaction-hint"), map: document.getElementById("minimap"), menu: document.getElementById("menu-panel"), pauseP: document.getElementById("pause-panel"), pauseResume: document.getElementById("pause-resume"), pauseOptions: document.getElementById("pause-options"), pauseQuit: document.getElementById("pause-quit"), pauseAdv: document.getElementById("pause-advancements"), pauseStats: document.getElementById("pause-stats"), pauseFeedback: document.getElementById("pause-feedback"), pauseBugs: document.getElementById("pause-bugs"), pauseLan: document.getElementById("pause-lan"), titleSplash: document.getElementById("title-splash"), newWorldPopup: document.getElementById("new-world-popup"), newWorldSeed: document.getElementById("newworld-seed"), newWorldSlot: document.getElementById("newworld-slot"), newWorldType: document.getElementById("newworld-type"), newWorldCustomize: document.getElementById("newworld-customize"), newWorldStructures: document.getElementById("newworld-structures"), newWorldBonus: document.getElementById("newworld-bonus"), newWorldGameMode: document.getElementById("newworld-gamemode"), newWorldDifficulty: document.getElementById("newworld-difficulty"), newWorldCheats: document.getElementById("newworld-cheats"), newWorldTime: document.getElementById("newworld-time"), newWorldReset: document.getElementById("newworld-reset"), newWorldConfirm: document.getElementById("create-world-confirm"), newWorldCancel: document.getElementById("create-world-cancel"), invP: document.getElementById("inventory-panel"), craftP: document.getElementById("crafting-panel"), furP: document.getElementById("furnace-panel"), chestP: document.getElementById("chest-panel"), enchP: document.getElementById("enchant-panel"), setP: document.getElementById("settings-panel"), invG: document.getElementById("inventory-grid"), invCraftG: document.getElementById("inventory-craft-grid"), invCraftOut: document.getElementById("inventory-craft-output"), rec: document.getElementById("crafting-recipes"), chestG: document.getElementById("chest-grid"), enchO: document.getElementById("enchant-options"), fi: document.getElementById("furnace-input"), ff: document.getElementById("furnace-fuel"), fs: document.getElementById("furnace-start"), fst: document.getElementById("furnace-status"), rd: document.getElementById("render-distance"), pack: document.getElementById("texture-pack"), skin: document.getElementById("skin-color"), slot: document.getElementById("world-slot")
+      healthFill: document.getElementById("health-fill"), hungerFill: document.getElementById("hunger-fill"), xpFill: document.getElementById("xp-fill"), oxygenFill: document.getElementById("oxygen-fill"), healthText: document.getElementById("health-text"), hungerText: document.getElementById("hunger-text"), xpText: document.getElementById("xp-text"), oxygenText: document.getElementById("oxygen-text"), modePill: document.getElementById("mode-pill"), coords: document.getElementById("coords"), clock: document.getElementById("clock"), hotbar: document.getElementById("hotbar"), hint: document.getElementById("interaction-hint"), map: document.getElementById("minimap"), menu: document.getElementById("menu-panel"), titleSplash: document.getElementById("title-splash"), loadingPanel: document.getElementById("world-loading"), loadingPercent: document.getElementById("world-loading-percent"), loadingLabel: document.getElementById("world-loading-label"), startNewBtn: document.getElementById("start-new"), loadWorldBtn: document.getElementById("load-world"), invP: document.getElementById("inventory-panel"), craftP: document.getElementById("crafting-panel"), furP: document.getElementById("furnace-panel"), chestP: document.getElementById("chest-panel"), enchP: document.getElementById("enchant-panel"), setP: document.getElementById("settings-panel"), chatP: document.getElementById("chat-panel"), chatLog: document.getElementById("chat-log"), chatIn: document.getElementById("chat-input"), invG: document.getElementById("inventory-grid"), rec: document.getElementById("crafting-recipes"), chestG: document.getElementById("chest-grid"), enchO: document.getElementById("enchant-options"), fi: document.getElementById("furnace-input"), ff: document.getElementById("furnace-fuel"), fs: document.getElementById("furnace-start"), fst: document.getElementById("furnace-status"), rd: document.getElementById("render-distance"), pack: document.getElementById("texture-pack"), skin: document.getElementById("skin-color"), slot: document.getElementById("world-slot"), seed: document.getElementById("seed-input")
     };
-    u.newWorldTabs = Array.from(document.querySelectorAll(".nw-tab"));
-    u.newWorldPanels = Array.from(document.querySelectorAll(".new-world-panel"));
-    if (u.hotbar) {
-      u.hotbar.innerHTML = "";
-      for (let i = 0; i < 9; i++) {
-        const s = document.createElement("div");
-        s.className = "slot";
-        s.dataset.i = i;
-        u.hotbar.append(s);
-      }
-    }
-    u.fs?.addEventListener("click", () => this.startSmelt());
-    u.invCraftOut?.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0 && e.button !== 2) return;
-      e.preventDefault();
-      this.invCraftOutputAction(e.button);
-    });
-    u.invCraftOut?.addEventListener("contextmenu", (e) => e.preventDefault());
-    document.querySelectorAll("[data-close]").forEach((e) => e.addEventListener("click", () => {
-      if (e.dataset.close === "inventory-panel") this.flushInvCraftGridToInventory();
-      document.getElementById(e.dataset.close)?.classList.add("hidden");
-      this.lockIf();
-    }));
-    document.getElementById("start-new")?.addEventListener("click", () => this.openNewWorldPopup());
-    document.getElementById("load-world")?.addEventListener("click", () => { this.closeNewWorldPopup(); this.loadWorld(u.slot?.value || u.newWorldSlot?.value || "slot1"); u.menu?.classList.add("hidden"); this.lock(); });
+    u.hotbar.innerHTML = ""; for (let i = 0; i < 9; i++) { const s = document.createElement("div"); s.className = "slot"; s.dataset.i = i; u.hotbar.append(s); }
+    u.fs.addEventListener("click", () => this.startSmelt());
+    document.querySelectorAll("[data-close]").forEach((e) => e.addEventListener("click", () => { document.getElementById(e.dataset.close).classList.add("hidden"); this.lockIf(); }));
+    u.startNewBtn.addEventListener("click", () => { const t = u.seed.value.trim(), seed = t ? (Number(t) || hs(t)) : Math.floor(Math.random() * 1e9); this.startWorldTransition({ type: "new", seed, slot: u.slot.value }); });
+    u.loadWorldBtn.addEventListener("click", () => { this.startWorldTransition({ type: "load", slot: u.slot.value }); });
     document.getElementById("open-options")?.addEventListener("click", () => {
-      this.ui?.setP?.classList.remove("hidden");
+      this.ui.setP.classList.remove("hidden");
     });
-    u.newWorldCancel?.addEventListener("click", () => this.closeNewWorldPopup());
-    u.newWorldConfirm?.addEventListener("click", () => {
-      const t = u.newWorldSeed?.value?.trim() || "";
-      const seed = t ? (Number(t) || hs(t)) : Math.floor(Math.random() * 1e9);
-      const slot = u.newWorldSlot?.value || u.slot?.value || "slot1";
-      if (u.slot) u.slot.value = slot;
-      this.newWorld(seed, slot, { ...this.newWorldCfg });
-      this.closeNewWorldPopup();
-      u.menu?.classList.add("hidden");
-      this.lock();
-    });
-    u.newWorldType?.addEventListener("click", () => {
-      this.newWorldCfg.type = this.newWorldCfg.type === "default" ? "flat" : "default";
-      u.newWorldType.textContent = `World Type: ${this.newWorldCfg.type === "default" ? "Default" : "Flat"}`;
-    });
-    u.newWorldCustomize?.addEventListener("click", () => {
-      this.chat("Customize presets are coming soon.");
-    });
-    u.newWorldStructures?.addEventListener("click", () => {
-      this.newWorldCfg.structures = !this.newWorldCfg.structures;
-      this.setToggleBtn(u.newWorldStructures, this.newWorldCfg.structures);
-    });
-    u.newWorldBonus?.addEventListener("click", () => {
-      this.newWorldCfg.bonusChest = !this.newWorldCfg.bonusChest;
-      this.setToggleBtn(u.newWorldBonus, this.newWorldCfg.bonusChest);
-    });
-    u.newWorldGameMode?.addEventListener("click", () => {
-      this.newWorldCfg.gamemode = this.newWorldCfg.gamemode === "survival" ? "creative" : "survival";
-      u.newWorldGameMode.textContent = `Game Mode: ${this.newWorldCfg.gamemode === "creative" ? "Creative" : "Survival"}`;
-    });
-    u.newWorldDifficulty?.addEventListener("click", () => {
-      const order = ["peaceful", "easy", "normal", "hard"];
-      const idx = order.indexOf(this.newWorldCfg.difficulty);
-      this.newWorldCfg.difficulty = order[(idx + 1 + order.length) % order.length];
-      u.newWorldDifficulty.textContent = `Difficulty: ${this.newWorldCfg.difficulty[0].toUpperCase()}${this.newWorldCfg.difficulty.slice(1)}`;
-    });
-    u.newWorldCheats?.addEventListener("click", () => {
-      this.newWorldCfg.cheats = !this.newWorldCfg.cheats;
-      this.setToggleBtn(u.newWorldCheats, this.newWorldCfg.cheats);
-    });
-    u.newWorldTime?.addEventListener("click", () => {
-      const order = ["day", "noon", "sunset", "night"];
-      const idx = order.indexOf(this.newWorldCfg.startTime);
-      this.newWorldCfg.startTime = order[(idx + 1 + order.length) % order.length];
-      u.newWorldTime.textContent = `Starting Time: ${this.newWorldCfg.startTime[0].toUpperCase()}${this.newWorldCfg.startTime.slice(1)}`;
-    });
-    u.newWorldReset?.addEventListener("click", () => this.resetNewWorldCfg());
-    u.newWorldSlot?.addEventListener("change", () => { if (u.slot) u.slot.value = u.newWorldSlot.value; });
-    u.newWorldTabs.forEach((tabBtn) => tabBtn.addEventListener("click", () => this.setNewWorldTab(tabBtn.dataset.tab || "world")));
-    u.pauseResume?.addEventListener("click", () => this.resumeFromPause());
-    u.pauseOptions?.addEventListener("click", () => { if (u.pauseP) u.pauseP.classList.add("hidden"); u.setP.classList.remove("hidden"); document.exitPointerLock(); });
-    u.pauseQuit?.addEventListener("click", () => this.quitToTitle());
-    [u.pauseAdv, u.pauseStats, u.pauseFeedback, u.pauseBugs, u.pauseLan].forEach((b) => b?.addEventListener("click", () => this.hint("Not available yet.")));
-    u.rd?.addEventListener("input", () => this.world.setRD(Number(u.rd.value)));
-    if (this.perf.low && u.rd) {
+    u.rd.addEventListener("input", () => this.world.setRD(Number(u.rd.value)));
+    if (this.perf.low) {
       u.rd.max = "4";
       if (Number(u.rd.value) > 4) u.rd.value = "4";
     }
-    u.pack?.addEventListener("change", () => { this.world.setPack(u.pack.value); this.itemIconCache.clear(); this.rHot(); this.rInv(); this.rInvCraft(); });
-    u.skin?.addEventListener("input", () => { this.pm.material.color.set(u.skin.value); this.redrawFirstPersonHandTexture(u.skin.value); });
-    document.getElementById("toggle-third-person")?.addEventListener("click", () => { this.third = !this.third; });
-    document.getElementById("toggle-creative")?.addEventListener("click", () => this.toggleCreative());
-    document.getElementById("take-screenshot")?.addEventListener("click", () => this.shot());
-    u.oxygenRow = document.getElementById("oxygen-fill")?.closest(".bar-row");
+    u.pack.addEventListener("change", () => this.world.setPack(u.pack.value));
+    u.skin.addEventListener("input", () => this.pm.material.color.set(u.skin.value));
+    document.getElementById("toggle-third-person").addEventListener("click", () => { this.third = !this.third; });
+    document.getElementById("toggle-creative").addEventListener("click", () => this.toggleCreative());
+    document.getElementById("take-screenshot").addEventListener("click", () => this.shot());
+    u.oxygenRow = document.getElementById("oxygen-fill").closest(".bar-row");
     u.invCursor = document.getElementById("inventory-cursor");
     if (!u.invCursor) {
       u.invCursor = document.createElement("div");
@@ -1893,56 +1490,7 @@ class Game {
       u.invCursor.className = "hidden";
       document.body.append(u.invCursor);
     }
-    this.setToggleBtn(u.newWorldStructures, this.newWorldCfg.structures);
-    this.setToggleBtn(u.newWorldBonus, this.newWorldCfg.bonusChest);
-    this.setToggleBtn(u.newWorldCheats, this.newWorldCfg.cheats);
-    this.setNewWorldTab(this.newWorldCfg.tab || "world");
-    this.resetNewWorldCfg(true);
     return u;
-  }
-  setToggleBtn(btn, on) {
-    if (!btn) return;
-    btn.textContent = on ? (btn.dataset.on || "ON") : (btn.dataset.off || "OFF");
-    btn.classList.toggle("is-on", on);
-    btn.classList.toggle("is-off", !on);
-  }
-  openNewWorldPopup() {
-    if (!this.ui?.newWorldPopup) {
-      // Fallback for deployments where index.html is older than main.js.
-      const seed = Math.floor(Math.random() * 1e9);
-      const slot = this.ui?.slot?.value || "slot1";
-      this.newWorld(seed, slot, { ...(this.newWorldCfg || {}) });
-      this.ui?.menu?.classList.add("hidden");
-      this.lock();
-      return;
-    }
-    if (this.ui.newWorldSlot && this.ui.slot) this.ui.newWorldSlot.value = this.ui.slot.value;
-    if (this.ui.newWorldSeed) this.ui.newWorldSeed.value = "";
-    this.ui.menu?.classList.add("creating-world");
-    this.setNewWorldTab(this.newWorldCfg.tab || "world");
-    this.ui.newWorldPopup.classList.remove("hidden");
-  }
-  closeNewWorldPopup() {
-    if (!this.ui?.newWorldPopup) return;
-    this.ui.newWorldPopup.classList.add("hidden");
-    this.ui.menu?.classList.remove("creating-world");
-  }
-  setNewWorldTab(tab = "world") {
-    const want = ["game", "world", "more"].includes(tab) ? tab : "world";
-    this.newWorldCfg.tab = want;
-    this.ui?.newWorldTabs?.forEach((b) => b.classList.toggle("active", b.dataset.tab === want));
-    this.ui?.newWorldPanels?.forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== want));
-  }
-  resetNewWorldCfg(keepTab = false) {
-    this.newWorldCfg = { ...this.newWorldCfg, ...(keepTab ? {} : { tab: "world" }), type: "default", structures: true, bonusChest: false, gamemode: "survival", difficulty: "normal", cheats: false, startTime: "day" };
-    if (this.ui?.newWorldType) this.ui.newWorldType.textContent = "World Type: Default";
-    if (this.ui?.newWorldGameMode) this.ui.newWorldGameMode.textContent = "Game Mode: Survival";
-    if (this.ui?.newWorldDifficulty) this.ui.newWorldDifficulty.textContent = "Difficulty: Normal";
-    if (this.ui?.newWorldTime) this.ui.newWorldTime.textContent = "Starting Time: Day";
-    this.setToggleBtn(this.ui?.newWorldStructures, true);
-    this.setToggleBtn(this.ui?.newWorldBonus, false);
-    this.setToggleBtn(this.ui?.newWorldCheats, false);
-    this.setNewWorldTab(this.newWorldCfg.tab || "world");
   }
   setTitleSplash() {
     if (!this.ui?.titleSplash) return;
@@ -1961,50 +1509,34 @@ class Game {
     });
   }
   events() {
-    window.addEventListener("resize", () => { this.cam.aspect = window.innerWidth / window.innerHeight; this.cam.updateProjectionMatrix(); this.r.setSize(window.innerWidth, window.innerHeight); this.updateUi3dCamera(); });
+    window.addEventListener("resize", () => { this.cam.aspect = window.innerWidth / window.innerHeight; this.cam.updateProjectionMatrix(); this.r.setSize(window.innerWidth, window.innerHeight); });
     this.canvas.addEventListener("click", () => { if (!this.anyOpen()) this.lock(); this.audio.on(); });
-    document.addEventListener("pointerlockchange", () => {
-      if (document.pointerLockElement === this.canvas) return;
-      this.md.l = 0; this.md.r = 0; this.p.bt = null; this.p.bp = 0; this.clearBreakFx();
-      // Browsers may release pointer lock on Escape before keydown reaches the game.
-      if (this.ui?.menu?.classList.contains("hidden") && !this.anyOpen()) this.showPauseMenu();
-    });
-    document.addEventListener("mousemove", (e) => {
-      this.invMouse.x = e.clientX; this.invMouse.y = e.clientY; this.rInvCursor();
-      if (document.pointerLockElement !== this.canvas) return;
-      this.yaw -= e.movementX * 0.0024;
-      this.pitch -= e.movementY * 0.0024;
-      this.pitch = clamp(this.pitch, -Math.PI / 2 + 0.01, Math.PI / 2 - 0.01);
-      // Opposite-direction mouse sway impulse for a more "alive" first-person hand.
-      if (this.handSway) {
-        this.handSway.vx = clamp(this.handSway.vx + clamp(-e.movementX * 0.001, -0.09, 0.09), -0.18, 0.18);
-        this.handSway.vy = clamp(this.handSway.vy + clamp(e.movementY * 0.001, -0.08, 0.08), -0.16, 0.16);
-      }
-    });
+    document.addEventListener("pointerlockchange", () => { if (document.pointerLockElement !== this.canvas) { this.md.l = 0; this.md.r = 0; this.p.bt = null; this.p.bp = 0; this.clearBreakFx(); } });
+    document.addEventListener("mousemove", (e) => { this.invMouse.x = e.clientX; this.invMouse.y = e.clientY; this.rInvCursor(); if (document.pointerLockElement !== this.canvas) return; this.yaw -= e.movementX * 0.0024; this.pitch -= e.movementY * 0.0024; this.pitch = clamp(this.pitch, -Math.PI / 2 + 0.01, Math.PI / 2 - 0.01); });
     document.addEventListener("mousedown", (e) => { if (this.anyOpen()) return; if (e.button === 0) this.md.l = 1; if (e.button === 2) this.md.r = 1; if (document.pointerLockElement === this.canvas) e.preventDefault(); });
     document.addEventListener("mouseup", (e) => { if (e.button === 0) { this.md.l = 0; this.p.bt = null; this.p.bp = 0; this.clearBreakFx(); } if (e.button === 2) this.md.r = 0; });
     document.addEventListener("contextmenu", (e) => e.preventDefault());
     document.addEventListener("wheel", (e) => { if (this.anyOpen()) return; this.inv.sel = (this.inv.sel + Math.sign(e.deltaY) + 9) % 9; this.rHot(); });
     document.addEventListener("keydown", (e) => {
+      if (this.chatOpen && e.code !== "Escape") return;
       this.keys.add(e.code);
       if (e.code.startsWith("Digit")) { const n = Number(e.code.replace("Digit", "")); if (n >= 1 && n <= 9) { this.inv.sel = n - 1; this.rHot(); } }
       if (e.code === "KeyE") this.tPanel(this.ui.invP);
       if (e.code === "KeyC") this.tPanel(this.ui.craftP);
+      if (e.code === "KeyO") this.tPanel(this.ui.setP);
+      if (e.code === "KeyT") this.tChat();
       if (e.code === "F5") { e.preventDefault(); this.third = !this.third; }
       if (e.code === "KeyM") this.toggleCreative();
       if (e.code === "KeyR") this.tReplay();
       if (e.code === "KeyB") { this.p.data.brush = !this.p.data.brush; this.chat(`Terrain brush ${this.p.data.brush ? "enabled" : "disabled"}.`); }
       if (e.code === "KeyP") this.shot();
+      if (e.code === "KeyL") this.portal();
       if (e.code === "KeyF") this.interact();
       if (e.code === "KeyQ") this.dropSel();
-      if (e.code === "Escape") {
-        e.preventDefault();
-        if (!this.ui.menu.classList.contains("hidden")) return;
-        if (!this.ui.pauseP.classList.contains("hidden")) { this.resumeFromPause(); return; }
-        this.showPauseMenu();
-      }
+      if (e.code === "Escape") { this.ui.setP.classList.remove("hidden"); document.exitPointerLock(); }
     });
     document.addEventListener("keyup", (e) => this.keys.delete(e.code));
+    this.ui.chatIn.addEventListener("keydown", (e) => { if (e.key !== "Enter") return; const t = this.ui.chatIn.value.trim(); this.ui.chatIn.value = ""; if (t) this.cmd(t); });
   }
   cmd(t) {
     if (t.startsWith("/")) {
@@ -2020,31 +1552,12 @@ class Game {
     }
     this.chat(`You: ${t}`);
   }
-  showPauseMenu() {
-    if (!this.ui.invP?.classList.contains("hidden")) this.flushInvCraftGridToInventory();
-    [this.ui.invP, this.ui.craftP, this.ui.furP, this.ui.chestP, this.ui.enchP, this.ui.setP].forEach((p) => p?.classList.add("hidden"));
-    this.md.l = 0; this.md.r = 0; this.p.bt = null; this.p.bp = 0; this.clearBreakFx();
-    this.ui.pauseP?.classList.remove("hidden");
-    document.exitPointerLock();
-  }
-  resumeFromPause() {
-    this.ui.pauseP?.classList.add("hidden");
-    this.ui.setP?.classList.add("hidden");
-    this.lockIf();
-  }
-  quitToTitle() {
-    this.saveWorld(this.slot);
-    this.ui.pauseP?.classList.add("hidden");
-    this.ui.setP?.classList.add("hidden");
-    this.closeNewWorldPopup();
-    this.ui.menu.classList.remove("hidden");
-    document.exitPointerLock();
-  }
-  chat(m) { if (m !== undefined) console.log(`[MineCrap] ${m}`); }
+  tChat() { this.chatOpen = !this.chatOpen; this.ui.chatP.classList.toggle("hidden", !this.chatOpen); if (this.chatOpen) { document.exitPointerLock(); this.ui.chatIn.focus(); } else this.lockIf(); }
+  chat(m) { const d = document.createElement("div"); d.textContent = m; this.ui.chatLog.append(d); this.ui.chatLog.scrollTop = this.ui.chatLog.scrollHeight; }
   toggleCreative() { this.p.creative = !this.p.creative; this.chat(`Gamemode: ${this.p.creative ? "creative" : "survival"}`); }
   lock() { if (document.pointerLockElement !== this.canvas) this.canvas.requestPointerLock(); }
-  lockIf() { if (!this.anyOpen()) this.lock(); }
-  anyOpen() { return [this.ui.menu, this.ui.pauseP, this.ui.invP, this.ui.craftP, this.ui.furP, this.ui.chestP, this.ui.enchP, this.ui.setP].some((p) => p && !p.classList.contains("hidden")); }
+  lockIf() { if (!this.anyOpen() && !this.chatOpen) this.lock(); }
+  anyOpen() { return [this.ui.menu, this.ui.invP, this.ui.craftP, this.ui.furP, this.ui.chestP, this.ui.enchP, this.ui.setP].some((p) => !p.classList.contains("hidden")); }
   isInventoryOpen() { return !this.ui.invP.classList.contains("hidden"); }
   stackMax(id) { return this.inv.max(id); }
   stackEqual(a, b) { return !!a?.id && !!b?.id && a.id === b.id && (a.d || 0) === (b.d || 0) && JSON.stringify(a.e || null) === JSON.stringify(b.e || null); }
@@ -2068,104 +1581,15 @@ class Game {
     if (p.length === 1) return p[0].slice(0, 2).toUpperCase();
     return `${p[0][0] || ""}${p[p.length - 1][0] || ""}`.toUpperCase();
   }
-  shadeHex(hex, mul) {
-    const rgb = hexRGB(hex);
-    const r = clamp(Math.floor(rgb.r * mul), 0, 255);
-    const g = clamp(Math.floor(rgb.g * mul), 0, 255);
-    const b = clamp(Math.floor(rgb.b * mul), 0, 255);
-    return (r << 16) | (g << 8) | b;
-  }
-  itemIconCacheKey(id) {
-    const pack = this.world?.pack || "classic";
-    const atlasTex = this.world?.atlas?.texture;
-    const atlasId = atlasTex?.uuid || "no-atlas";
-    const atlasVer = atlasTex?.version || 0;
-    return `${id}|${pack}|${atlasId}|${atlasVer}`;
-  }
-  drawAtlasFace(ctx, key, x, y, w, h, shade = 1, fallbackHex = 0xffffff) {
-    const idx = TILE_INDEX.get(key);
-    const atlasImg = this.world?.atlas?.texture?.image;
-    ctx.imageSmoothingEnabled = false;
-    if (idx !== undefined && atlasImg) {
-      const sx = (idx % ATLAS_COLS) * ATLAS_TILE;
-      const sy = Math.floor(idx / ATLAS_COLS) * ATLAS_TILE;
-      ctx.drawImage(atlasImg, sx, sy, ATLAS_TILE, ATLAS_TILE, x, y, w, h);
-    } else {
-      const hex = this.shadeHex(fallbackHex, shade);
-      ctx.fillStyle = `#${hex.toString(16).padStart(6, "0")}`;
-      ctx.fillRect(x, y, w, h);
-      return;
-    }
-    if (shade !== 1) {
-      const dark = shade < 1;
-      const alpha = clamp(Math.abs(1 - shade) * (dark ? 0.55 : 0.35), 0, 0.45);
-      ctx.fillStyle = dark ? `rgba(0,0,0,${alpha})` : `rgba(255,255,255,${alpha})`;
-      ctx.fillRect(x, y, w, h);
-    }
-  }
-  renderBlockItemIcon(ctx, blockId, size) {
-    const cKey = COLOR_KEY[blockId] || "stone";
-    const fallback = (PACKS[this.world.pack] || PACKS.classic)[cKey] || 0xffffff;
-    const topKey = this.heldBlockFaceKey(blockId, [0, 1, 0]);
-    const leftKey = this.heldBlockFaceKey(blockId, [-1, 0, 0]);
-    const rightKey = this.heldBlockFaceKey(blockId, [1, 0, 0]);
-
-    const topX = Math.floor(size * 0.25), topY = Math.floor(size * 0.06), topW = Math.floor(size * 0.5), topH = Math.floor(size * 0.24);
-    const leftX = Math.floor(size * 0.12), leftY = Math.floor(size * 0.3), leftW = Math.floor(size * 0.38), leftH = Math.floor(size * 0.58);
-    const rightX = Math.floor(size * 0.5), rightY = Math.floor(size * 0.3), rightW = Math.floor(size * 0.38), rightH = Math.floor(size * 0.58);
-
-    this.drawAtlasFace(ctx, topKey, topX, topY, topW, topH, 1.08, fallback);
-    this.drawAtlasFace(ctx, leftKey, leftX, leftY, leftW, leftH, 0.9, fallback);
-    this.drawAtlasFace(ctx, rightKey, rightX, rightY, rightW, rightH, 0.72, fallback);
-
-    ctx.strokeStyle = "rgba(0,0,0,0.35)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(leftX, leftY, leftW, leftH);
-    ctx.strokeRect(rightX, rightY, rightW, rightH);
-  }
-  renderGenericItemIcon(ctx, id, size) {
-    const base = this.itemColor(id);
-    const top = this.shadeHex(base, 1.08);
-    const left = this.shadeHex(base, 0.92);
-    const right = this.shadeHex(base, 0.72);
-    const topX = Math.floor(size * 0.26), topY = Math.floor(size * 0.1), topW = Math.floor(size * 0.48), topH = Math.floor(size * 0.22);
-    const leftX = Math.floor(size * 0.14), leftY = Math.floor(size * 0.3), leftW = Math.floor(size * 0.34), leftH = Math.floor(size * 0.56);
-    const rightX = Math.floor(size * 0.48), rightY = Math.floor(size * 0.3), rightW = Math.floor(size * 0.38), rightH = Math.floor(size * 0.56);
-    ctx.fillStyle = `#${top.toString(16).padStart(6, "0")}`; ctx.fillRect(topX, topY, topW, topH);
-    ctx.fillStyle = `#${left.toString(16).padStart(6, "0")}`; ctx.fillRect(leftX, leftY, leftW, leftH);
-    ctx.fillStyle = `#${right.toString(16).padStart(6, "0")}`; ctx.fillRect(rightX, rightY, rightW, rightH);
-    ctx.strokeStyle = "rgba(0,0,0,0.3)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(leftX, leftY, leftW, leftH);
-    ctx.strokeRect(rightX, rightY, rightW, rightH);
-  }
-  getItemIconDataUrl(id) {
-    if (!id) return "";
-    const k = this.itemIconCacheKey(id);
-    if (this.itemIconCache.has(k)) return this.itemIconCache.get(k);
-    const size = 32;
-    const c = document.createElement("canvas");
-    c.width = size; c.height = size;
-    const ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, size, size);
-    ctx.imageSmoothingEnabled = false;
-    const blockId = ITEM[id]?.block;
-    if (blockId) this.renderBlockItemIcon(ctx, blockId, size);
-    else this.renderGenericItemIcon(ctx, id, size);
-    const url = c.toDataURL("image/png");
-    this.itemIconCache.set(k, url);
-    return url;
-  }
   drawStack(el, sl, opts = {}) {
     if (!sl?.id) return;
     const icon = document.createElement("span");
     icon.className = "item-icon";
-    const img = document.createElement("img");
-    img.className = "item-icon-canvas";
-    img.alt = sl.id;
-    img.draggable = false;
-    img.src = this.getItemIconDataUrl(sl.id);
-    icon.append(img);
+    icon.style.background = `#${this.itemColor(sl.id).toString(16).padStart(6, "0")}`;
+    const code = document.createElement("span");
+    code.className = "item-code";
+    code.textContent = this.itemCode(sl.id);
+    icon.append(code);
     el.append(icon);
     if (opts.showLabel) {
       const lbl = document.createElement("span");
@@ -2235,163 +1659,8 @@ class Game {
     this.cleanSlot(i);
     if (this.invCursor.id && this.invCursor.c <= 0) this.invCursor = mk();
     this.rInv();
-    this.rInvCraft();
     this.rHot();
     this.rInvCursor();
-  }
-  slotActionArray(arr, i, btn = 0) {
-    const slot = arr[i];
-    let cur = this.invCursor;
-    if (btn === 2) {
-      if (!cur.id) {
-        if (slot.id) {
-          const take = Math.ceil(slot.c / 2);
-          this.invCursor = this.cloneStack(slot, take);
-          slot.c -= take;
-          if (slot.c <= 0) arr[i] = mk();
-        }
-      } else if (!slot.id) {
-        arr[i] = this.cloneStack(cur, 1);
-        cur.c -= 1;
-        if (cur.c <= 0) this.invCursor = mk();
-      } else if (this.stackEqual(cur, slot)) {
-        const m = this.stackMax(slot.id);
-        if (slot.c < m) {
-          slot.c += 1;
-          cur.c -= 1;
-          if (cur.c <= 0) this.invCursor = mk();
-        }
-      } else {
-        arr[i] = cur;
-        this.invCursor = slot.id ? slot : mk();
-      }
-    } else {
-      if (!cur.id) {
-        if (slot.id) {
-          this.invCursor = this.cloneStack(slot);
-          arr[i] = mk();
-        }
-      } else if (!slot.id) {
-        arr[i] = this.cloneStack(cur);
-        this.invCursor = mk();
-      } else if (this.stackEqual(cur, slot)) {
-        const m = this.stackMax(slot.id);
-        const add = Math.min(cur.c, Math.max(0, m - slot.c));
-        slot.c += add;
-        cur.c -= add;
-        if (cur.c <= 0) this.invCursor = mk();
-      } else {
-        arr[i] = cur;
-        this.invCursor = slot.id ? slot : mk();
-      }
-    }
-    if (!arr[i]?.id || arr[i].c <= 0) arr[i] = mk();
-    if (this.invCursor.id && this.invCursor.c <= 0) this.invCursor = mk();
-  }
-  craftSlotAction(i, btn = 0) {
-    if (!this.isInventoryOpen()) return;
-    this.slotActionArray(this.invCraft, i, btn);
-    this.rInvCraft();
-    this.rInvCursor();
-    this.rHot();
-  }
-  invCraftCounts() {
-    const out = {};
-    for (const s of this.invCraft) if (s.id && s.c > 0) out[s.id] = (out[s.id] || 0) + s.c;
-    return out;
-  }
-  findInvCraftMatch() {
-    const cnt = this.invCraftCounts();
-    const keys = Object.keys(cnt);
-    if (!keys.length) return null;
-    for (const r of RECIPES) {
-      const need = r.in;
-      const total = Object.values(need).reduce((a, b) => a + b, 0);
-      if (total > 4) continue;
-      const nKeys = Object.keys(need);
-      if (nKeys.length !== keys.length) continue;
-      let ok = true;
-      for (const k of nKeys) if ((cnt[k] || 0) !== need[k]) { ok = false; break; }
-      if (ok) return r;
-    }
-    return null;
-  }
-  consumeInvCraft(req) {
-    for (const [id, count] of Object.entries(req)) {
-      let left = count;
-      for (let i = 0; i < this.invCraft.length && left > 0; i++) {
-        const s = this.invCraft[i];
-        if (s.id !== id) continue;
-        const t = Math.min(left, s.c);
-        s.c -= t;
-        left -= t;
-        if (s.c <= 0) this.invCraft[i] = mk();
-      }
-    }
-  }
-  canTakeCraftOutput(out) {
-    const cur = this.invCursor;
-    if (!cur.id) return true;
-    const probe = { id: out.id, c: out.c, d: 0, e: null };
-    if (!this.stackEqual(cur, probe)) return false;
-    return cur.c + out.c <= this.stackMax(out.id);
-  }
-  addCraftOutputToCursor(out) {
-    if (!this.invCursor.id) this.invCursor = { id: out.id, c: out.c, d: ITEM[out.id]?.dur || 0, e: null };
-    else this.invCursor.c += out.c;
-  }
-  invCraftOutputAction(btn = 0) {
-    if (!this.isInventoryOpen()) return;
-    if (btn !== 0 && btn !== 2) return;
-    const r = this.findInvCraftMatch();
-    if (!r) return;
-    if (!this.canTakeCraftOutput(r.out)) return;
-    this.consumeInvCraft(r.in);
-    this.addCraftOutputToCursor(r.out);
-    this.rInvCraft();
-    this.rInvCursor();
-    this.rHot();
-    this.ach("craft", "Craft your first item");
-  }
-  flushInvCraftGridToInventory() {
-    let moved = 0;
-    for (let i = 0; i < this.invCraft.length; i++) {
-      const s = this.invCraft[i];
-      if (!s.id || s.c <= 0) continue;
-      const left = this.inv.add(s.id, s.c);
-      moved += s.c - left;
-      if (left <= 0) this.invCraft[i] = mk();
-      else this.invCraft[i].c = left;
-    }
-    if (moved > 0) { this.rInv(); this.rHot(); }
-    this.rInvCraft();
-  }
-  rInvCraft() {
-    if (!this.ui.invCraftG || !this.ui.invCraftOut) return;
-    this.ui.invCraftG.innerHTML = "";
-    for (let i = 0; i < this.invCraft.length; i++) {
-      const sl = this.invCraft[i];
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "grid-slot";
-      this.drawStack(b, sl, { showLabel: false });
-      b.addEventListener("pointerdown", (e) => {
-        if (!this.isInventoryOpen()) return;
-        if (e.button !== 0 && e.button !== 2) return;
-        e.preventDefault();
-        this.craftSlotAction(i, e.button);
-      });
-      b.addEventListener("contextmenu", (e) => e.preventDefault());
-      this.ui.invCraftG.append(b);
-    }
-    const outEl = this.ui.invCraftOut;
-    const r = this.findInvCraftMatch();
-    outEl.innerHTML = "";
-    outEl.classList.toggle("empty", !r);
-    if (r) {
-      this.drawStack(outEl, { id: r.out.id, c: r.out.c, d: ITEM[r.out.id]?.dur || 0, e: null }, { showLabel: false });
-      outEl.title = `${r.out.id} x${r.out.c}`;
-    } else outEl.title = "Craft output";
   }
   rInvCursor() {
     if (!this.ui.invCursor) return;
@@ -2411,11 +1680,10 @@ class Game {
       this.md.l = 0; this.md.r = 0;
       document.exitPointerLock();
     } else {
-      if (p === this.ui.invP) this.flushInvCraftGridToInventory();
       p.classList.add("hidden");
       this.lockIf();
     }
-    if (p === this.ui.invP) { this.rInv(); this.rInvCraft(); this.rInvCursor(); }
+    if (p === this.ui.invP) { this.rInv(); this.rInvCursor(); }
     if (p === this.ui.craftP) this.rCraft();
   }
   moveIn() {
@@ -2425,56 +1693,129 @@ class Game {
     const n = Math.hypot(l, z) || 1;
     return { x: l / n, z: z / n };
   }
-  newWorld(seed, slot, cfg = null) {
-    const worldCfg = { ...this.newWorldCfg, ...(cfg || {}) };
-    this.itemIconCache.clear();
+  nextFrame() { return new Promise((resolve) => requestAnimationFrame(() => resolve())); }
+  setWorldLoadButtonsEnabled(enabled) {
+    [this.ui?.startNewBtn, this.ui?.loadWorldBtn].forEach((b) => {
+      if (!b) return;
+      b.disabled = !enabled;
+    });
+  }
+  setWorldLoadingVisible(visible) {
+    if (!this.ui?.menu || !this.ui?.loadingPanel) return;
+    if (visible) this.ui.menu.classList.remove("hidden");
+    this.ui.menu.classList.toggle("creating-world", !!visible);
+    this.ui.loadingPanel.classList.toggle("hidden", !visible);
+  }
+  setWorldLoadingProgress(percent, label = null) {
+    this.worldLoadProgress = clamp(Math.round(percent), 0, 100);
+    if (this.ui?.loadingPercent) this.ui.loadingPercent.textContent = `${this.worldLoadProgress}%`;
+    if (label !== null && this.ui?.loadingLabel) this.ui.loadingLabel.textContent = label;
+  }
+  collectPrewarmChunks() {
+    const [pcx, pcz] = this.world.cc(this.p.pos.x, this.p.pos.z);
+    const out = [];
+    for (let dz = -this.world.rd; dz <= this.world.rd; dz++) for (let dx = -this.world.rd; dx <= this.world.rd; dx++) {
+      const cx = pcx + dx, cz = pcz + dz;
+      out.push({ cx, cz, k: this.world.ck(cx, cz), d: Math.abs(dx) + Math.abs(dz) });
+    }
+    out.sort((a, b) => a.d - b.d);
+    return out;
+  }
+  async prewarmWorldAtPlayer() {
+    const targets = this.collectPrewarmChunks();
+    const total = Math.max(1, targets.length);
+    const every = this.perf.low ? 1 : 2;
+    this.world.loaded.clear();
+    this.world.pending.clear();
+
+    for (let i = 0; i < targets.length; i++) {
+      const t = targets[i];
+      this.world.ensure(t.cx, t.cz);
+      this.world.loaded.add(t.k);
+      if (i % every === 0 || i === targets.length - 1) {
+        this.setWorldLoadingProgress(15 + Math.floor(((i + 1) / total) * 40), "Generating terrain...");
+        await this.nextFrame();
+      }
+    }
+
+    for (let i = 0; i < targets.length; i++) {
+      const t = targets[i];
+      this.world.rebuild(t.cx, t.cz);
+      this.world.pending.delete(t.k);
+      if (i % every === 0 || i === targets.length - 1) {
+        this.setWorldLoadingProgress(55 + Math.floor(((i + 1) / total) * 45), "Building chunks...");
+        await this.nextFrame();
+      }
+    }
+
+    const want = new Set(targets.map((t) => t.k));
+    for (const k of Array.from(this.world.loaded)) if (!want.has(k)) { this.world.loaded.delete(k); this.world.dropMesh(k); }
+    this.world.pending.clear();
+  }
+  async startWorldTransition({ type, seed = Math.floor(Math.random() * 1e9), slot }) {
+    if (this.worldLoadActive) return;
+    this.worldLoadActive = true;
+    this.setWorldLoadButtonsEnabled(false);
+    this.setWorldLoadingVisible(true);
+    this.setWorldLoadingProgress(0, type === "load" ? "Loading world..." : "Creating world...");
+
+    try {
+      await this.nextFrame();
+      if (type === "load") this.loadWorld(slot, { deferPrewarm: true });
+      else this.newWorld(seed, slot, { deferPrewarm: true });
+
+      this.setWorldLoadingProgress(6, "Loading textures...");
+      const texReady = this.world?.textureReady && typeof this.world.textureReady.then === "function" ? this.world.textureReady : Promise.resolve();
+      await Promise.race([texReady, new Promise((resolve) => setTimeout(resolve, 4500))]);
+
+      this.setWorldLoadingProgress(15, "Preparing terrain...");
+      await this.prewarmWorldAtPlayer();
+      this.setWorldLoadingProgress(100, "Done");
+      await this.nextFrame();
+      await this.nextFrame();
+
+      this.setWorldLoadingVisible(false);
+      this.ui.menu.classList.add("hidden");
+      this.lock();
+    } catch (err) {
+      console.error("[WebCraft] World transition failed.", err);
+      this.chat("World loading failed. Check console for details.");
+      this.setWorldLoadingVisible(false);
+      this.ui.menu.classList.remove("hidden");
+    } finally {
+      this.setWorldLoadButtonsEnabled(true);
+      this.worldLoadActive = false;
+    }
+  }
+  newWorld(seed, slot, opts = {}) {
     if (this.world) {
       for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k);
       if (this.world.atlas?.texture) this.world.atlas.texture.dispose();
     }
     this.slot = slot; this.world = new World(this.scene, seed, this.ui.pack.value || "classic"); this.world.setPerf(this.perf.world); this.world.setRD(Number(this.ui.rd.value) || 4);
-    this.world.setWorldOptions({ structures: worldCfg.structures !== false });
     this.mobs.clear(); this.items.forEach((d) => this.scene.remove(d.mesh)); this.items = [];
     this.clearBreakFx();
     this.inv = new Inventory();
-    this.invCraft = Array.from({ length: 4 }, () => mk());
-    this.invCursor = mk();
-    this.p.pos.set(0.5, 40, 0.5); this.p.vel.set(0, 0, 0); this.p.hp = 20; this.resetFoodState(20, 5); this.p.ox = 20; this.p.xp = 0; this.p.lv = 1; this.p.creative = worldCfg.gamemode === "creative" ? 1 : 0; this.p.mount = null; this.p.data.cheats = !!worldCfg.cheats; this.p.data.difficulty = worldCfg.difficulty || "normal"; this.p.data.naturalRegen = this.p.data.naturalRegen !== false;
-    this.time = { day: 6000, noon: 12000, sunset: 18000, night: 23000 }[worldCfg.startTime] ?? 6000; this.achs.clear(); this.replay = []; this.replayOn = 0;
-    this.world.updateLoaded(this.p.pos);
-    this.p.pos.copy(this.findSpawn(80, 0, 0));
-    this.world.updateLoaded(this.p.pos);
+    this.p.pos.set(0.5, 40, 0.5); this.p.vel.set(0, 0, 0); this.p.hp = 20; this.p.hu = 20; this.p.ox = 20; this.p.xp = 0; this.p.lv = 1; this.p.creative = 0; this.p.mount = null;
+    this.time = 6000; this.achs.clear(); this.replay = []; this.replayOn = 0;
+    if (!opts.deferPrewarm) {
+      this.world.updateLoaded(this.p.pos);
+      this.p.pos.copy(this.findSpawn(80, 0, 0));
+      this.world.updateLoaded(this.p.pos);
+    } else {
+      this.p.pos.copy(this.findSpawn(80, 0, 0));
+    }
     this.p.fs = this.p.pos.y;
-    if (worldCfg.bonusChest) this.spawnBonusChestNearSpawn();
-    this.rHot(); this.rInv(); this.rInvCraft(); this.rCraft(); this.chat(`New world started. Seed ${seed}.`); ["Tutorial: Left click to break, right click to place.", "Tutorial: E inventory, C crafting, F interact with furnace/chest/table.", "Tutorial: Switch to creative with M. Use /brush stone 3 for terrain tools."].forEach((x) => this.chat(x));
-    if (!worldCfg.structures) this.chat("World option: structures disabled.");
+    this.rHot(); this.rInv(); this.rCraft(); this.chat(`New world started. Seed ${seed}.`); ["Tutorial: Left click to break, right click to place.", "Tutorial: E inventory, C crafting, F interact with furnace/chest/table.", "Tutorial: Switch to creative with M. Use /brush stone 3 for terrain tools.", "Tutorial: Build portal blocks and press L while inside to change dimension."].forEach((x) => this.chat(x));
     if (this.perf.low && !this.perfAnnounced) { this.chat("Performance mode enabled for low-end devices: reduced shadows/lights/effects and chunk batching."); this.perfAnnounced = true; }
   }
-  spawnBonusChestNearSpawn() {
-    const offs = [[2, 0], [0, 2], [-2, 0], [0, -2], [3, 1], [-3, -1]];
-    for (const [ox, oz] of offs) {
-      const x = Math.floor(this.p.pos.x) + ox, z = Math.floor(this.p.pos.z) + oz, y = this.world.surface(x, z) + 1;
-      const under = this.world.get(x, y - 1, z), here = this.world.get(x, y, z), up = this.world.get(x, y + 1, z);
-      if (DEF[under]?.liquid || under === BLOCK.AIR) continue;
-      if (here !== BLOCK.AIR || DEF[up]?.solid) continue;
-      this.world.set(x, y, z, BLOCK.CHEST, { mod: 1 });
-      const key = this.world.bk(x, y, z);
-      this.world.tile.set(key, { t: "chest", i: [{ id: "bread", c: 3 }, { id: "coal", c: 6 }, { id: "plank", c: 16 }, { id: "stick", c: 8 }, ...Array.from({ length: 23 }, () => mk())] });
-      this.world.rebuildNear(x, y, z);
-      this.chat("Bonus chest spawned near your start.");
-      return true;
-    }
-    return false;
-  }
   saveWorld(slot) {
-    const f = this.ensureFoodState();
-    const v = { world: this.world.save(), player: { pos: this.p.pos.toArray(), vel: this.p.vel.toArray(), hp: this.p.hp, hu: f.level, food: { level: f.level, saturation: f.saturation, exhaustion: f.exhaustion, tickTimer: f.tickTimer }, ox: this.p.ox, xp: this.p.xp, lv: this.p.lv, creative: this.p.creative, yaw: this.yaw, pitch: this.pitch, difficulty: this.p.data?.difficulty || "normal", naturalRegen: this.p.data?.naturalRegen !== false }, inv: this.inv.json(), time: this.time, ach: Array.from(this.achs), mobs: this.mobs.save(), weather: this.weather, replay: this.replay.slice(-300), ver: 1 };
+    const v = { world: this.world.save(), player: { pos: this.p.pos.toArray(), vel: this.p.vel.toArray(), hp: this.p.hp, hu: this.p.hu, ox: this.p.ox, xp: this.p.xp, lv: this.p.lv, creative: this.p.creative, yaw: this.yaw, pitch: this.pitch }, inv: this.inv.json(), time: this.time, ach: Array.from(this.achs), mobs: this.mobs.save(), weather: this.weather, replay: this.replay.slice(-300), ver: 1 };
     localStorage.setItem(`webcraft:${slot}`, JSON.stringify(v));
   }
-  loadWorld(slot) {
-    const raw = localStorage.getItem(`webcraft:${slot}`); if (!raw) { this.chat(`No save found in ${slot}.`); this.newWorld(Math.floor(Math.random() * 1e9), slot); return; }
+  loadWorld(slot, opts = {}) {
+    const raw = localStorage.getItem(`webcraft:${slot}`); if (!raw) { this.chat(`No save found in ${slot}.`); this.newWorld(Math.floor(Math.random() * 1e9), slot, opts); return; }
     const v = JSON.parse(raw); this.slot = slot;
-    this.itemIconCache.clear();
     const savedPack = typeof v?.world?.pack === "string" ? v.world.pack : "classic";
     const packName = PACKS[savedPack] ? savedPack : "classic";
     this.ui.pack.value = packName;
@@ -2482,12 +1823,12 @@ class Game {
       for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k);
       if (this.world.atlas?.texture) this.world.atlas.texture.dispose();
     }
-    this.world = new World(this.scene, v.world.seed, packName); this.world.setPerf(this.perf.world); this.world.setRD(Number(this.ui.rd.value) || 4); this.world.load(v.world); this.world.updateLoaded(new THREE.Vector3(...v.player.pos));
+    this.world = new World(this.scene, v.world.seed, packName); this.world.setPerf(this.perf.world); this.world.setRD(Number(this.ui.rd.value) || 4); this.world.load(v.world); if (!opts.deferPrewarm) this.world.updateLoaded(new THREE.Vector3(...v.player.pos));
     this.clearBreakFx();
-    this.p.pos.fromArray(v.player.pos); this.p.vel.fromArray(v.player.vel || [0, 0, 0]); this.p.hp = v.player.hp; this.loadFoodState(v.player || {}); this.p.ox = v.player.ox; this.p.xp = v.player.xp; this.p.lv = v.player.lv; this.p.creative = v.player.creative; this.yaw = v.player.yaw || 0; this.pitch = v.player.pitch || 0; this.p.data.difficulty = v.player?.difficulty || this.p.data?.difficulty || "normal"; this.p.data.naturalRegen = v.player?.naturalRegen !== false;
-    this.inv = new Inventory(); this.inv.load(v.inv); this.invCraft = Array.from({ length: 4 }, () => mk()); this.invCursor = mk(); this.time = v.time || 6000; this.achs = new Set(v.ach || []); this.weather = v.weather || { t: "clear", timer: 20, i: 0 }; this.replay = v.replay || [];
+    this.p.pos.fromArray(v.player.pos); this.p.vel.fromArray(v.player.vel || [0, 0, 0]); this.p.hp = v.player.hp; this.p.hu = v.player.hu; this.p.ox = v.player.ox; this.p.xp = v.player.xp; this.p.lv = v.player.lv; this.p.creative = v.player.creative; this.yaw = v.player.yaw || 0; this.pitch = v.player.pitch || 0;
+    this.inv = new Inventory(); this.inv.load(v.inv); this.time = v.time || 6000; this.achs = new Set(v.ach || []); this.weather = v.weather || { t: "clear", timer: 20, i: 0 }; this.replay = v.replay || [];
     this.mobs.load(v.mobs); this.items.forEach((d) => this.scene.remove(d.mesh)); this.items = [];
-    this.rHot(); this.rInv(); this.rInvCraft(); this.rCraft(); this.chat(`Loaded world from ${slot}.`);
+    this.rHot(); this.rInv(); this.rCraft(); this.chat(`Loaded world from ${slot}.`);
   }
   findSpawn(radius = 64, cx = 0, cz = 0) {
     for (let r = 0; r <= radius; r += 2) {
@@ -2511,20 +1852,16 @@ class Game {
   pMove(dt) {
     if (this.replayOn || this.p.mount) return;
     if (this.anyOpen()) { this.p.vel.set(0, 0, 0); return; }
-    const oldX = this.p.pos.x, oldZ = this.p.pos.z;
-    const food = this.ensureFoodState();
     const mv = this.moveIn(), f = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw)), r = new THREE.Vector3(-f.z, 0, f.x);
-    const canSprint = this.p.creative || food.level > 6;
-    const sp = (this.keys.has("ShiftLeft") || this.keys.has("ShiftRight")) && canSprint && mv.z > 0.2; this.p.sprint = sp;
+    const sp = (this.keys.has("ShiftLeft") || this.keys.has("ShiftRight")) && this.p.hu > 0 && mv.z > 0.2; this.p.sprint = sp;
     const base = this.p.creative ? 7.2 : sp ? 6.4 : 4.3;
     const water = this.world.isLiquid(Math.floor(this.p.pos.x), Math.floor(this.p.pos.y + 0.6), Math.floor(this.p.pos.z)); this.p.swim = water;
     const a = new THREE.Vector3().addScaledVector(f, mv.z * base).addScaledVector(r, mv.x * base);
     this.p.vel.x = lerp(this.p.vel.x, a.x, water ? 0.08 : 0.18); this.p.vel.z = lerp(this.p.vel.z, a.z, water ? 0.08 : 0.18);
-    let jumped = false;
     if (water) { this.p.vel.y -= 6.4 * dt; if (this.keys.has("Space")) this.p.vel.y = 3.5; }
     else {
       if (!this.p.creative) this.p.vel.y -= 20 * dt;
-      if (this.keys.has("Space") && this.p.g) { this.p.vel.y = this.p.creative ? 7 : 7.2; this.p.g = 0; jumped = !this.p.creative; }
+      if (this.keys.has("Space") && this.p.g) { this.p.vel.y = this.p.creative ? 7 : 7.2; this.p.g = 0; }
       if (this.p.creative && this.keys.has("Space")) this.p.vel.y = 5;
     }
     const old = this.p.pos.y; this.moveCol(dt);
@@ -2535,12 +1872,9 @@ class Game {
     if (h === BLOCK.WATER || h === BLOCK.LAVA) { this.p.ox = Math.max(0, this.p.ox - dt * 4.5); if (this.p.ox <= 0) this.damage(dt * 2.7, "drown"); }
     else this.p.ox = Math.min(20, this.p.ox + dt * 3.5);
     if (!this.p.creative) {
-      const moved = Math.hypot(this.p.pos.x - oldX, this.p.pos.z - oldZ);
-      if (moved > 0) {
-        if (water) this.addExhaustion(moved * 0.01);
-        else if (sp) this.addExhaustion(moved * 0.1);
-      }
-      if (jumped) this.addExhaustion(sp ? 0.2 : 0.05);
+      const dr = 0.015 + abs * 0.0025 + (sp ? 0.02 : 0); this.p.hu = Math.max(0, this.p.hu - dr * dt * 10);
+      if (this.p.hu > 14 && this.p.hp < 20) this.p.hp = Math.min(20, this.p.hp + dt * 0.35);
+      if (this.p.hu <= 0) this.damage(dt * 0.7, "starve");
     }
     if (this.p.pos.y < -20) { this.p.pos.set(8.5, 60, 8.5); this.p.vel.set(0, 0, 0); this.damage(4, "void"); }
   }
@@ -2552,61 +1886,10 @@ class Game {
     for (let bx = mnx; bx <= mxx; bx++) for (let by = mny; by <= mxy; by++) for (let bz = mnz; bz <= mxz; bz++) { const id = this.world.get(bx, by, bz), d = DEF[id]; if (!d?.solid || d.liquid) continue; if (id === BLOCK.DOOR && this.world.gd(bx, by, bz) > 0) continue; return 1; }
     return 0;
   }
-  playerIntersectsBlock(x, y, z) {
-    const eps = 0.001;
-    const px0 = this.p.pos.x - 0.3 + eps, px1 = this.p.pos.x + 0.3 - eps;
-    const py0 = this.p.pos.y + eps, py1 = this.p.pos.y + 1.8 - eps;
-    const pz0 = this.p.pos.z - 0.3 + eps, pz1 = this.p.pos.z + 0.3 - eps;
-    const bx0 = x, bx1 = x + 1, by0 = y, by1 = y + 1, bz0 = z, bz1 = z + 1;
-    return px1 > bx0 && px0 < bx1 && py1 > by0 && py0 < by1 && pz1 > bz0 && pz0 < bz1;
-  }
   camUp() {
     const e = this.p.pos.clone().add(new THREE.Vector3(0, 1.62, 0)), d = new THREE.Vector3(Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), Math.cos(this.yaw) * Math.cos(this.pitch));
-    if (!this.third) {
-      this.cam.position.copy(e); this.cam.lookAt(e.clone().add(d)); this.pm.visible = false;
-      if (this.fpHand) {
-        const visible = !this.anyOpen();
-        this.fpHand.visible = visible;
-        if (visible) {
-          if (this.fpHand.parent !== this.ui3dScene) this.ui3dScene.add(this.fpHand);
-          this.syncHeldBlockInHand();
-          const now = performance.now() * 0.001;
-          const move = Math.hypot(this.p.vel.x, this.p.vel.z);
-          const walkAmp = this.p.g ? clamp(move * 0.014, 0, 0.055) : 0;
-          const walk = Math.sin(now * 16 * (this.p.sprint ? 1.25 : 1)) * walkAmp;
-          const swinging = this.md.l || this.md.r;
-          const swingPhase = swinging ? (Math.sin(now * 22) * 0.5 + 0.5) : 0;
-          const swingDown = swingPhase * swingPhase;
-          const swingSide = swinging ? Math.sin(now * 22) * 0.05 : 0;
-          const hs = this.handSway || (this.handSway = { x: 0, y: 0, vx: 0, vy: 0 });
-          hs.vx *= 0.78; hs.vy *= 0.78;
-          hs.x = clamp(hs.x * 0.72 + hs.vx, -0.2, 0.2);
-          hs.y = clamp(hs.y * 0.72 + hs.vy, -0.18, 0.18);
-          const right = this.ui3dCam?.right ?? 1;
-          // UI-space hand anchor: always visible on screen, lower-right.
-          this.fpHand.position.set(
-            right - 0.42 + swingSide * 0.12 - swingDown * 0.22 + hs.x * 0.6,
-            -1.00 + walk * 0.6 + swingDown * 0.22 + hs.y * 0.45,
-            swingDown * 0.02
-          );
-          this.fpHand.scale.set(0.72, 0.72, 0.72);
-          // Forward-facing arm with swing arcing toward target/crosshair.
-          this.fpHand.rotation.set(
-            1.05 + walk * 0.16 - swingDown * 0.55 - hs.y * 0.35,
-            0.5 - swingSide * 0.2 + hs.x * 0.45,
-            -0.12 - swingSide * 0.28 + hs.x * 0.25
-          );
-        }
-      }
-    }
-    else {
-      const b = e.clone().addScaledVector(d, -4).add(new THREE.Vector3(0, 1.4, 0)); this.cam.position.lerp(b, 0.22); this.cam.lookAt(e); this.pm.visible = true; this.pm.position.copy(this.p.pos).add(new THREE.Vector3(0, 0.9, 0)); this.pm.rotation.y = this.yaw; this.pm.rotation.z = this.p.emo > 0 ? Math.sin(performance.now() * 0.01) * 0.35 : 0;
-      if (this.fpHand) this.fpHand.visible = false;
-      if (this.handSway) {
-        this.handSway.x *= 0.7; this.handSway.y *= 0.7;
-        this.handSway.vx *= 0.6; this.handSway.vy *= 0.6;
-      }
-    }
+    if (!this.third) { this.cam.position.copy(e); this.cam.lookAt(e.clone().add(d)); this.pm.visible = false; }
+    else { const b = e.clone().addScaledVector(d, -4).add(new THREE.Vector3(0, 1.4, 0)); this.cam.position.lerp(b, 0.22); this.cam.lookAt(e); this.pm.visible = true; this.pm.position.copy(this.p.pos).add(new THREE.Vector3(0, 0.9, 0)); this.pm.rotation.y = this.yaw; this.pm.rotation.z = this.p.emo > 0 ? Math.sin(performance.now() * 0.01) * 0.35 : 0; }
   }
   skyUp(dt) {
     this.time = (this.time + dt * 16) % 24000; const t = this.time / 24000, a = t * Math.PI * 2, sy = Math.sin(a), day = clamp((sy + 0.2) * 0.95, 0.08, 1);
@@ -2624,24 +1907,9 @@ class Game {
     if (this.weather.t === "clear") { this.rain.points.visible = false; return; }
     this.rain.points.visible = true;
     const p = this.rain.points.geometry.attributes.position;
-    const area = 60;
-    const half = area * 0.5;
-    const fall = this.weather.t === "storm" ? 35 : 24;
-    const windX = this.weather.t === "storm" ? 3.2 : 1.6;
-    const windZ = this.weather.t === "storm" ? 0.8 : 0.3;
     for (let i = 0; i < this.rain.n; i++) {
       let x = p.array[i * 3], y = p.array[i * 3 + 1], z = p.array[i * 3 + 2];
-      x += windX * dt;
-      z += windZ * dt;
-      y -= fall * dt;
-      const tooFar = x < this.p.pos.x - half || x > this.p.pos.x + half || z < this.p.pos.z - half || z > this.p.pos.z + half;
-      const collapsed = Math.abs(x - this.p.pos.x) < 0.7 && Math.abs(z - this.p.pos.z) < 0.7;
-      if (tooFar || collapsed) {
-        x = this.p.pos.x + (Math.random() - 0.5) * area;
-        z = this.p.pos.z + (Math.random() - 0.5) * area;
-        y = this.p.pos.y + 10 + Math.random() * 24;
-      }
-      if (y < this.p.pos.y - 4) y = this.p.pos.y + 25 + Math.random() * 12;
+      x += (this.p.pos.x - x) * 0.01; z += (this.p.pos.z - z) * 0.01; y -= (this.weather.t === "storm" ? 35 : 24) * dt; if (y < this.p.pos.y - 4) y = this.p.pos.y + 25 + Math.random() * 12;
       p.array[i * 3] = x; p.array[i * 3 + 1] = y; p.array[i * 3 + 2] = z;
     }
     p.needsUpdate = true;
@@ -2669,14 +1937,8 @@ class Game {
   }
   eatSel() {
     if (this.foodCd > 0) return 0;
-    const s = this.inv.selSlot(), it = ITEM[s.id], food = this.ensureFoodState(), restore = this.foodRestore(it);
-    if (!s.id || !restore || (food.level >= 20 && food.saturation >= food.level)) return 0;
-    food.level = clamp(food.level + restore.food, 0, 20);
-    food.saturation = clamp(food.saturation + restore.sat, 0, food.level);
-    food.tickTimer = 0;
-    this.p.hu = food.level;
-    if (!this.p.creative) this.inv.useSel();
-    this.foodCd = 0.45; this.audio.play("eat"); this.rHot(); this.ach("snack", "Eat food to restore hunger"); return 1;
+    const s = this.inv.selSlot(), it = ITEM[s.id]; if (!s.id || !it?.food || this.p.hu >= 20) return 0;
+    this.p.hu = Math.min(20, this.p.hu + it.food); if (!this.p.creative) this.inv.useSel(); this.foodCd = 0.45; this.audio.play("eat"); this.rHot(); this.ach("snack", "Eat food to restore hunger"); return 1;
   }
   breakDo(b, dt) {
     const k = `${b.x},${b.y},${b.z}`; if (this.p.bt !== k) { this.p.bt = k; this.p.bp *= 0.35; }
@@ -2690,7 +1952,8 @@ class Game {
       this.world.set(b.x, b.y, b.z, BLOCK.AIR, { mod: 1 });
       const hex = (PACKS[this.world.pack] || PACKS.classic)[COLOR_KEY[b.id] || "stone"] || 0xffffff;
       this.pfx.burst(new THREE.Vector3(b.x + 0.5, b.y + 0.5, b.z + 0.5), hex, 12, 2.5, 0.52); this.audio.play("break");
-      if (b.id === BLOCK.CROP) { const st = this.world.gd(b.x, b.y, b.z); this.drop(new THREE.Vector3(b.x + 0.5, b.y + 0.4, b.z + 0.5), "seed", 1 + Math.floor(Math.random() * 2)); if (st >= 3) this.drop(new THREE.Vector3(b.x + 0.5, b.y + 0.4, b.z + 0.5), "wheat", 1 + Math.floor(Math.random() * 2)); }
+      if (b.id === BLOCK.TNT) this.explode(b.x + 0.5, b.y + 0.5, b.z + 0.5, 4.5);
+      else if (b.id === BLOCK.CROP) { const st = this.world.gd(b.x, b.y, b.z); this.drop(new THREE.Vector3(b.x + 0.5, b.y + 0.4, b.z + 0.5), "seed", 1 + Math.floor(Math.random() * 2)); if (st >= 3) this.drop(new THREE.Vector3(b.x + 0.5, b.y + 0.4, b.z + 0.5), "wheat", 1 + Math.floor(Math.random() * 2)); }
       else {
         const dr = d.drop || NAME[b.id] || "cobble"; let ct = 1; if (s.e?.fort && [BLOCK.COAL, BLOCK.IRON, BLOCK.GOLD].includes(b.id)) ct += Math.floor(Math.random() * (s.e.fort + 1));
         this.drop(new THREE.Vector3(b.x + 0.5, b.y + 0.5, b.z + 0.5), dr, ct);
@@ -2698,25 +1961,24 @@ class Game {
       if ([BLOCK.COAL, BLOCK.IRON, BLOCK.GOLD].includes(b.id)) { this.xp(3); this.ach("miner", "Mine your first ore"); }
       if (b.id === BLOCK.LOG) this.ach("lumber", "Punch wood");
       if (!this.p.creative && s.id && ITEM[s.id]?.dur) { s.d -= 1; this.inv.cleanDur(); }
-      this.addExhaustion(0.005);
       this.p.bt = null; this.p.bp = 0; this.clearBreakFx();
     }
   }
   placeDo(p, hit) {
     const s = this.inv.selSlot(), it = ITEM[s.id]; if (!s.id || !it) return;
     const x = p.x, y = p.y, z = p.z;
-    if (this.playerIntersectsBlock(x, y, z)) return;
+    if (Math.abs(x + 0.5 - this.p.pos.x) < 0.6 && Math.abs(y - this.p.pos.y) < 2 && Math.abs(z + 0.5 - this.p.pos.z) < 0.6) return;
     const ex = this.world.get(x, y, z); if (ex !== BLOCK.AIR && !DEF[ex]?.repl) return;
-    if (it.block) { this.world.set(x, y, z, it.block, { mod: 1 }); if (!this.p.creative) this.inv.useSel(); this.rHot(); this.audio.play("place"); return; }
+    if (it.block) { this.world.set(x, y, z, it.block, { mod: 1 }); if (!this.p.creative) this.inv.useSel(); this.rHot(); this.audio.play("place"); if (it.block === BLOCK.PORTAL) this.ach("portal_builder", "Build a portal block"); return; }
     if (it.crop) { const b = this.world.get(x, y - 1, z); if ([BLOCK.DIRT, BLOCK.GRASS, BLOCK.FARM].includes(b)) { this.world.set(x, y - 1, z, BLOCK.FARM, { mod: 1 }); this.world.set(x, y, z, BLOCK.CROP, { mod: 1, data: 0 }); if (!this.p.creative) this.inv.useSel(); this.rHot(); } return; }
-    if (it.vehicle) { const u = this.world.get(x, y - 1, z); if (it.vehicle === "boat" && u !== BLOCK.WATER && u !== BLOCK.GLASS) return; if (it.vehicle === "cart" && u !== LEGACY_BLOCK.RAIL) return; this.mobs.spawnVehicle(it.vehicle === "cart" ? "cart" : "boat", new THREE.Vector3(x + 0.5, y + 0.3, z + 0.5)); if (!this.p.creative) this.inv.useSel(); this.rHot(); }
+    if (it.vehicle) { const u = this.world.get(x, y - 1, z); if (it.vehicle === "boat" && u !== BLOCK.WATER && u !== BLOCK.GLASS) return; if (it.vehicle === "cart" && u !== BLOCK.RAIL) return; this.mobs.spawnVehicle(it.vehicle === "cart" ? "cart" : "boat", new THREE.Vector3(x + 0.5, y + 0.3, z + 0.5)); if (!this.p.creative) this.inv.useSel(); this.rHot(); }
   }
   interact() {
     if (this.useCd > 0) return; this.useCd = 0.2;
     const eye = this.p.pos.clone().add(new THREE.Vector3(0, 1.62, 0)), dir = new THREE.Vector3(Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), Math.cos(this.yaw) * Math.cos(this.pitch)), h = this.world.ray(eye, dir, 6);
     if (!h.hit) return this.mount();
     const { x, y, z, id } = h.b, u = DEF[id]?.use;
-    if (!u) return;
+    if (!u) { if (id === BLOCK.PORTAL) this.portal(); return; }
     if (u === "craft") { this.tPanel(this.ui.craftP); this.rCraft(); return; }
     if (u === "furnace") return this.openF(x, y, z);
     if (u === "chest") return this.openC(x, y, z);
@@ -2727,26 +1989,7 @@ class Game {
   openC(x, y, z) {
     this.ui.chestP.classList.remove("hidden"); document.exitPointerLock(); const k = this.world.bk(x, y, z), c = this.world.tile.get(k) || { t: "chest", i: Array.from({ length: 27 }, () => mk()) }; this.world.tile.set(k, c);
     this.ui.chestG.innerHTML = "";
-    c.i.forEach((s, idx) => {
-      const b = document.createElement("button");
-      b.className = "grid-slot";
-      this.drawStack(b, s, { showLabel: false });
-      b.addEventListener("click", () => {
-        if (s.id) {
-          const l = this.inv.add(s.id, s.c);
-          if (l === 0) c.i[idx] = mk();
-          else c.i[idx].c = l;
-        } else {
-          const sel = this.inv.selSlot();
-          if (sel.id) {
-            c.i[idx] = { ...sel };
-            this.inv.s[this.inv.sel] = mk();
-          }
-        }
-        this.openC(x, y, z); this.rHot(); this.rInv();
-      });
-      this.ui.chestG.append(b);
-    });
+    c.i.forEach((s, idx) => { const b = document.createElement("button"); b.className = "grid-slot"; b.textContent = s.id ? s.id : "Empty"; if (s.c > 1) { const c1 = document.createElement("span"); c1.className = "count"; c1.textContent = String(s.c); b.append(c1); } b.addEventListener("click", () => { if (s.id) { const l = this.inv.add(s.id, s.c); if (l === 0) c.i[idx] = mk(); else c.i[idx].c = l; } else { const sel = this.inv.selSlot(); if (sel.id) { c.i[idx] = { ...sel }; this.inv.s[this.inv.sel] = mk(); } } this.openC(x, y, z); this.rHot(); this.rInv(); }); this.ui.chestG.append(b); });
   }
   openF(x, y, z) {
     this.ui.furP.classList.remove("hidden"); document.exitPointerLock(); this.fKey = this.world.bk(x, y, z); if (!this.world.tile.has(this.fKey)) this.world.tile.set(this.fKey, { t: "furnace", in: null, fuel: null, left: 0, p: 0, out: null }); this.rF();
@@ -2789,9 +2032,8 @@ class Game {
     for (let dx = mn; dx <= mx; dx++) for (let dy = mn; dy <= mx; dy++) for (let dz = mn; dz <= mx; dz++) {
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz); if (dist > pow) continue;
       const bx = Math.floor(x + dx), by = Math.floor(y + dy), bz = Math.floor(z + dz), id = this.world.get(bx, by, bz);
-      if (id === BLOCK.AIR) continue;
-      this.world.set(bx, by, bz, BLOCK.AIR, { mod: 1 });
-      if (Math.random() < 0.2) this.world.set(bx, by, bz, BLOCK.LAVA, { mod: 1, data: 2 });
+      if (id === BLOCK.AIR || id === BLOCK.OBS || id === BLOCK.PORTAL) continue;
+      this.world.set(bx, by, bz, BLOCK.AIR, { mod: 1 }); if (Math.random() < 0.2) this.world.set(bx, by, bz, BLOCK.LAVA, { mod: 1, data: 2 }); if (id === BLOCK.TNT && Math.random() < 0.45) setTimeout(() => this.explode(bx + 0.5, by + 0.5, bz + 0.5, 3.5), 120);
     }
     this.pfx.burst(c, 0xff9233, 90, 6.8, 1.3); this.audio.play("thunder");
     const pd = this.p.pos.distanceTo(c); if (pd < pow * 2) { const dmg = (pow * 2 - pd) * 2.2; this.damage(dmg, "explosion"); this.p.vel.add(this.p.pos.clone().sub(c).normalize().multiplyScalar(5)); }
@@ -2800,11 +2042,10 @@ class Game {
   damage(a, s = "") {
     if (this.p.creative) return;
     this.p.hp = Math.max(0, this.p.hp - a);
-    if (s !== "starvation") this.addExhaustion(0.1);
     this.audio.play("hurt");
     if (s) this.hint(`-${a.toFixed(1)} HP (${s})`);
     if (this.p.hp <= 0) {
-      this.p.hp = 20; this.resetFoodState(20, 5); this.p.ox = 20;
+      this.p.hp = 20; this.p.hu = 20; this.p.ox = 20;
       const sx = Math.floor(this.p.pos.x), sz = Math.floor(this.p.pos.z);
       this.p.pos.copy(this.findSpawn(56, sx, sz));
       this.p.vel.set(0, 0, 0);
@@ -2818,14 +2059,13 @@ class Game {
   ach(id, t) { if (this.achs.has(id)) return; this.achs.add(id); this.chat(`Achievement: ${t}`); this.audio.play("ach"); }
   farmTick() { for (const k of this.world.loaded) { const [cx, cz] = k.split(",").map(Number); for (let lx = 0; lx < CHUNK; lx++) for (let lz = 0; lz < CHUNK; lz++) for (let y = 1; y < WORLD_H - 1; y++) { const wx = cx * CHUNK + lx, wz = cz * CHUNK + lz; if (this.world.get(wx, y, wz) !== BLOCK.CROP) continue; const st = this.world.gd(wx, y, wz), wet = this.world.get(wx, y - 1, wz) === BLOCK.FARM; if (!wet) this.world.set(wx, y, wz, BLOCK.AIR, { mod: 1 }); else if (Math.random() < 0.02) this.world.sd(wx, y, wz, clamp(st + 1, 0, 3)); } } }
   hud() {
-    const food = this.ensureFoodState();
     const set = (e, v, m = 20) => e.style.width = `${clamp((v / m) * 100, 0, 100)}%`;
     set(this.ui.healthFill, this.p.hp);
-    set(this.ui.hungerFill, food.level);
+    set(this.ui.hungerFill, this.p.hu);
     set(this.ui.xpFill, this.p.xp, this.p.lv * 10);
     set(this.ui.oxygenFill, this.p.ox);
     this.ui.healthText.textContent = `${Math.ceil(this.p.hp)}/20`;
-    this.ui.hungerText.textContent = `${Math.ceil(food.level)}/20`;
+    this.ui.hungerText.textContent = `${Math.ceil(this.p.hu)}/20`;
     this.ui.xpText.textContent = `L${this.p.lv}`;
     this.ui.oxygenText.textContent = `${Math.ceil(this.p.ox)}`;
     if (this.ui.oxygenRow) this.ui.oxygenRow.style.display = (this.p.ox < 19.9 || this.p.swim) ? "grid" : "none";
@@ -2880,20 +2120,12 @@ class Game {
     c.strokeStyle = "#ffffff"; c.beginPath(); c.moveTo(s / 2, s / 2); c.lineTo(s / 2 + Math.sin(this.yaw) * 12, s / 2 + Math.cos(this.yaw) * 12); c.stroke();
   }
   mount() { if (this.p.mount) { this.p.mount.rider = null; this.p.mount = null; this.chat("Unmounted."); return; } let n = null, d = 2; for (const v of this.mobs.v) { const dist = v.p.distanceTo(this.p.pos); if (dist < d && !v.rider) { d = dist; n = v; } } if (n) { n.rider = "player"; this.p.mount = n; this.chat(`Mounted ${n.t}.`); } }
-  portal() { this.chat("Portals are disabled in this build."); }
-  shot() {
-    ["hud", "hotbar", "interaction-hint", "crosshair"].forEach((i) => document.getElementById(i).classList.add("hidden"));
-    this.r.clear();
-    this.r.render(this.scene, this.cam);
-    this.r.clearDepth();
-    this.r.render(this.ui3dScene, this.ui3dCam);
-    const a = document.createElement("a"); a.href = this.canvas.toDataURL("image/png"); a.download = `webcraft-shot-${Date.now()}.png`; a.click();
-    ["hud", "hotbar", "interaction-hint", "crosshair"].forEach((i) => document.getElementById(i).classList.remove("hidden"));
-  }
+  portal() { const x = Math.floor(this.p.pos.x), y = Math.floor(this.p.pos.y + 1), z = Math.floor(this.p.pos.z); if (this.world.get(x, y, z) !== BLOCK.PORTAL) return this.chat("Stand inside a portal block to teleport."); this.world.dimension = this.world.dimension === "overworld" ? "nether" : "overworld"; this.p.pos.y = this.world.dimension === "nether" ? 38 : 52; this.world.cd.clear(); for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k); this.world.loaded.clear(); this.world.updateLoaded(this.p.pos); this.chat(`Dimension: ${this.world.dimension}`); this.ach("dimension", "Travel to another dimension"); }
+  shot() { ["hud", "hotbar", "interaction-hint", "crosshair"].forEach((i) => document.getElementById(i).classList.add("hidden")); this.r.render(this.scene, this.cam); const a = document.createElement("a"); a.href = this.canvas.toDataURL("image/png"); a.download = `webcraft-shot-${Date.now()}.png`; a.click(); ["hud", "hotbar", "interaction-hint", "crosshair"].forEach((i) => document.getElementById(i).classList.remove("hidden")); }
   tReplay() { if (this.replayOn) { this.replayOn = 0; if (this.replayGhost) { this.scene.remove(this.replayGhost); this.replayGhost = null; } return this.chat("Replay stopped."); } if (this.replay.length < 10) return this.chat("Not enough replay data."); this.replayOn = 1; this.replayGhost = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.35), new THREE.MeshBasicMaterial({ color: 0x7fd0ff, transparent: true, opacity: 0.45 })); this.scene.add(this.replayGhost); this.rIdx = 0; this.chat("Replay playing."); }
   replayUp(dt) { this.rRec = (this.rRec || 0) - dt; if (this.rRec <= 0) { this.rRec = 0.16; this.replay.push({ p: this.p.pos.toArray(), y: this.yaw }); if (this.replay.length > 1200) this.replay.shift(); } if (!this.replayOn || !this.replayGhost) return; this.rIdx += dt * 8; const i = Math.floor(this.rIdx); if (i >= this.replay.length - 1) return this.tReplay(); const f = this.replay[i]; this.replayGhost.position.fromArray(f.p).add(new THREE.Vector3(0, 0.9, 0)); this.replayGhost.rotation.y = f.y; }
   furnUp(dt) { for (const [k, f] of this.world.tile) { if (f.t !== "furnace" || !f.in || !SMELT[f.in] || f.left <= 0) continue; f.left -= dt; f.p += dt / 8; if (f.p >= 1) { f.p = 0; const o = SMELT[f.in]; if (!f.out) f.out = { id: o, c: 0 }; f.out.c += 1; f.in = null; const rem = this.inv.add(f.out.id, f.out.c); f.out.c = rem; if (f.out.c <= 0) f.out = null; } if (this.fKey === k && !this.ui.furP.classList.contains("hidden")) this.rF(); } }
-  tick() { this.world.tickPhysics(); this.farmTick(); this.hungerTick(); if (Math.random() < 0.03) { const x = Math.floor(this.p.pos.x), z = Math.floor(this.p.pos.z), y = this.world.surface(x, z) + 1, id = this.world.get(x, y, z); if (id === BLOCK.LAVA) this.damage(1, "burn"); } if (Math.random() < 0.01) this.saveWorld(this.slot); }
+  tick() { this.world.tickPhysics(); this.farmTick(); if (Math.random() < 0.03) { const x = Math.floor(this.p.pos.x), z = Math.floor(this.p.pos.z), y = this.world.surface(x, z) + 1, id = this.world.get(x, y, z); if (id === BLOCK.LAVA) this.damage(1, "burn"); } if (Math.random() < 0.01) this.saveWorld(this.slot); }
   pluginsUp(dt) { for (const p of this.plugins) if (typeof p.onFrame === "function") try { p.onFrame({ dt, game: this }, this); } catch (e) { console.error("Plugin error", e); } }
   loop(now) {
     const dt = clamp((now - this.last) / 1000, 0, 0.05); this.last = now; this.acc += dt;
@@ -2904,13 +2136,13 @@ class Game {
     this.audio.setOccl(clamp((SEA - this.p.pos.y) / 25, 0, 1));
     while (this.acc >= 1 / 20) { this.tick(); this.acc -= 1 / 20; }
     this.pluginsUp(dt);
-    this.r.clear();
-    this.r.render(this.scene, this.cam);
-    this.r.clearDepth();
-    this.r.render(this.ui3dScene, this.ui3dCam);
-    requestAnimationFrame(this.loop.bind(this));
+    this.r.render(this.scene, this.cam); requestAnimationFrame(this.loop.bind(this));
   }
 }
 
 window.WebCraftPlugins = window.WebCraftPlugins || [];
 window.__webcraft = new Game();
+
+
+
+

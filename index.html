@@ -116,6 +116,13 @@
       <span>MineCrap Prototype</span>
       <span>Not affiliated with Mojang.</span>
     </div>
+    <div id="world-loading" class="world-loading hidden" aria-live="polite">
+      <div id="world-loading-percent" class="world-loading-percent">0%</div>
+      <div class="world-loading-preview-frame">
+        <div id="world-loading-box" class="world-loading-box" aria-hidden="true"></div>
+      </div>
+      <div id="world-loading-label" class="world-loading-label">Preparing world...</div>
+    </div>
     <select id="world-slot" class="hidden" aria-hidden="true">
       <option value="slot1">Slot 1</option>
       <option value="slot2">Slot 2</option>
@@ -239,7 +246,9 @@
     if (!window.THREE) {
       window.showBootError("Could not load ./assets/three.min.js.");
     } else {
-      const BUILD_VERSION = "2026-02-28-3";
+      const BUILD_VERSION = "2026-02-28-4";
+      window.__WEBCRAFT_BUILD__ = BUILD_VERSION;
+      console.info("[WebCraft] Build", BUILD_VERSION);
       const s = document.createElement("script");
       s.src = `./src/main.js?v=${BUILD_VERSION}`;
       s.onerror = function () {
@@ -250,3 +259,4 @@
   </script>
 </body>
 </html>
+
