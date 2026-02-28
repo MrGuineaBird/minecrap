@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -241,19 +241,16 @@
       });
     })();
   </script>
-  <script src="./assets/three.min.js"></script>
+  <script src="./assets/three.min.js?v=2026-02-28-1"></script>
   <script>
     if (!window.THREE) {
       window.showBootError("Could not load ./assets/three.min.js.");
     } else {
-<<<<<<< HEAD
-      const BUILD_VERSION = "2026-02-28-4";
+      const BUILD_VERSION = "2026-02-28-15";
       window.__WEBCRAFT_BUILD__ = BUILD_VERSION;
       console.info("[WebCraft] Build", BUILD_VERSION);
-=======
->>>>>>> parent of fab54a6 (Add files via upload)
       const s = document.createElement("script");
-      s.src = "./src/main.js";
+      s.src = `./src/main.js?v=${BUILD_VERSION}`;
       s.onerror = function () {
         window.showBootError("Loaded three.js but failed to load ./src/main.js.");
       };
@@ -262,4 +259,11 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
