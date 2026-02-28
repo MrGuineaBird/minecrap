@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WebCraft Solo</title>
+  <title>MineCrap</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
 </head>
@@ -31,7 +31,11 @@
 
   <div id="inventory-panel" class="panel hidden">
     <h2>Inventory</h2>
-    <p class="tiny">Storage + hotbar now; inventory slot logic is reusable for future 2x2/3x3 crafting grids.</p>
+    <div class="inventory-craft-wrap">
+      <div id="inventory-craft-grid" class="inventory-craft-grid"></div>
+      <div class="inventory-craft-arrow">></div>
+      <button id="inventory-craft-output" class="grid-slot inventory-craft-output" type="button" title="Craft output"></button>
+    </div>
     <div id="inventory-grid" class="grid"></div>
     <div class="panel-actions">
       <button data-close="inventory-panel">Close</button>
@@ -94,21 +98,91 @@
     </div>
   </div>
 
-  <div id="menu-panel" class="panel">
-    <h1>WebCraft Solo</h1>
-    <label>World Seed <input id="seed-input" type="text" placeholder="leave empty for random" /></label>
-    <label>World Slot
-      <select id="world-slot">
-        <option value="slot1">Slot 1</option>
-        <option value="slot2">Slot 2</option>
-        <option value="slot3">Slot 3</option>
-      </select>
-    </label>
-    <div class="panel-actions">
-      <button id="start-new">New World</button>
-      <button id="load-world">Load World</button>
+  <div id="menu-panel" class="panel title-screen">
+    <div class="title-content">
+      <div class="title-hero">
+        <div class="title-logo">
+          <img class="title-logo-img" src="./textures/minecraplogo.png" alt="MineCrap" />
+        </div>
+        <p id="title-splash" class="title-splash">Now with extra questionable physics!</p>
+      </div>
+      <div class="title-main-actions">
+        <button id="start-new" class="mc-btn">Singleplayer</button>
+        <button id="load-world" class="mc-btn">Load World</button>
+        <button id="open-options" class="mc-btn">Options...</button>
+      </div>
     </div>
-    <p class="tiny">Controls: WASD move, Shift sprint, Space jump, E inventory, C crafting, F interact, Q drop, Left break, Right place, T chat, F5 third person.</p>
+    <div class="title-footer">
+      <span>MineCrap Prototype</span>
+      <span>Not affiliated with Mojang.</span>
+    </div>
+    <select id="world-slot" class="hidden" aria-hidden="true">
+      <option value="slot1">Slot 1</option>
+      <option value="slot2">Slot 2</option>
+      <option value="slot3">Slot 3</option>
+    </select>
+
+    <div id="new-world-popup" class="new-world-popup hidden">
+      <div class="new-world-tabs">
+        <button type="button" class="nw-tab" data-tab="game">Game</button>
+        <button type="button" class="nw-tab active" data-tab="world">World</button>
+        <button type="button" class="nw-tab" data-tab="more">More</button>
+      </div>
+      <div class="new-world-body">
+        <section class="new-world-panel hidden" data-panel="game">
+          <div class="new-world-row">
+            <button type="button" id="newworld-gamemode" class="nw-btn">Game Mode: Survival</button>
+            <button type="button" id="newworld-difficulty" class="nw-btn">Difficulty: Normal</button>
+          </div>
+          <p class="nw-note">Set your base gameplay style before creating a world.</p>
+        </section>
+
+        <section class="new-world-panel" data-panel="world">
+          <div class="new-world-row">
+            <button type="button" id="newworld-type" class="nw-btn">World Type: Default</button>
+            <button type="button" id="newworld-customize" class="nw-btn">Customize</button>
+          </div>
+          <label class="nw-label" for="newworld-seed">Seed for the world generator</label>
+          <input id="newworld-seed" class="nw-input" type="text" placeholder="Leave blank for a random seed" />
+          <div class="new-world-toggles">
+            <div class="nw-toggle-row">
+              <span>Generate Structures</span>
+              <button id="newworld-structures" type="button" class="nw-toggle is-on" data-on="ON" data-off="OFF">ON</button>
+            </div>
+            <div class="nw-toggle-row">
+              <span>Bonus Chest</span>
+              <button id="newworld-bonus" type="button" class="nw-toggle is-off" data-on="ON" data-off="OFF">OFF</button>
+            </div>
+          </div>
+          <div class="new-world-slot">
+            <label class="nw-label" for="newworld-slot">World Slot</label>
+            <select id="newworld-slot" class="nw-input">
+              <option value="slot1">Slot 1</option>
+              <option value="slot2">Slot 2</option>
+              <option value="slot3">Slot 3</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="new-world-panel hidden" data-panel="more">
+          <div class="new-world-toggles">
+            <div class="nw-toggle-row">
+              <span>Allow Cheats</span>
+              <button id="newworld-cheats" type="button" class="nw-toggle is-off" data-on="ON" data-off="OFF">OFF</button>
+            </div>
+          </div>
+          <div class="new-world-row">
+            <button type="button" id="newworld-time" class="nw-btn">Starting Time: Day</button>
+            <button type="button" id="newworld-reset" class="nw-btn">Reset Settings</button>
+          </div>
+          <p class="nw-note">Advanced options are lightweight for now and may expand later.</p>
+        </section>
+      </div>
+      <div class="new-world-actions">
+        <button id="create-world-confirm" type="button" class="nw-btn">Create New World</button>
+        <button id="create-world-cancel" type="button" class="nw-btn">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <div id="touch-controls" class="hidden">
@@ -121,10 +195,24 @@
     </div>
   </div>
 
-  <div id="chat-panel" class="panel hidden chat">
-    <h2>Local Chat</h2>
-    <div id="chat-log"></div>
-    <input id="chat-input" type="text" placeholder="Type message and press Enter" />
+  <div id="pause-panel" class="panel hidden pause-menu">
+    <h2>Game Menu</h2>
+    <div class="pause-actions">
+      <button id="pause-resume" class="pause-btn">Back to Game</button>
+      <div class="pause-row">
+        <button id="pause-advancements" class="pause-btn">Advancements</button>
+        <button id="pause-stats" class="pause-btn">Statistics</button>
+      </div>
+      <div class="pause-row">
+        <button id="pause-feedback" class="pause-btn">Give Feedback</button>
+        <button id="pause-bugs" class="pause-btn">Report Bugs</button>
+      </div>
+      <div class="pause-row">
+        <button id="pause-options" class="pause-btn">Options...</button>
+        <button id="pause-lan" class="pause-btn">Open to LAN</button>
+      </div>
+      <button id="pause-quit" class="pause-btn">Save and Quit to Title</button>
+    </div>
   </div>
 
   <div id="boot-error" class="panel hidden">
