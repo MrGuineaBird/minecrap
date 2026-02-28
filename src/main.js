@@ -1217,11 +1217,14 @@ class MobSys {
     let dmg = s.id && ITEM[s.id]?.weapon ? ITEM[s.id].weapon : 2;
     if (s.e?.sharpness) dmg += s.e.sharpness;
     best.h -= dmg; this.g.p.at = 0.45; this.g.audio.play("hit"); this.g.pfx.burst(best.p.clone().add(new THREE.Vector3(0, 1, 0)), 0xff4444, 7, 2.2, 0.35);
+<<<<<<< HEAD
     best.hitTint = Math.max(best.hitTint || 0, 0.22);
     best.flee = Math.max(best.flee || 0, 2.0);
     best.fleeDir.copy(best.p).sub(this.g.p.pos).setY(0);
     if (best.fleeDir.lengthSq() < 0.0001) best.fleeDir.set(Math.random() - 0.5, 0, Math.random() - 0.5);
     best.fleeDir.normalize();
+=======
+>>>>>>> parent of fab54a6 (Add files via upload)
     if (s.id && ITEM[s.id]?.dur) { s.d -= 1; this.g.inv.cleanDur(); }
     if (best.h <= 0) { this.kill(best); this.g.xp(best.t === "golem" ? 25 : 6); }
     return 1;
@@ -1384,7 +1387,10 @@ class Game {
     this.keys = new Set(); this.md = { l: 0, r: 0 }; this.placeCd = 0; this.useCd = 0; this.foodCd = 0; this.step = 0; this.acc = 0; this.time = 6000; this.replay = []; this.replayGhost = null; this.replayOn = 0; this.achs = new Set(); this.chatOpen = 0; this.items = []; this.plugins = window.WebCraftPlugins || [];
     this.invCursor = mk(); this.invMouse = { x: -999, y: -999 };
     this.mapCd = 0; this.loadCd = 0;
+<<<<<<< HEAD
     this.worldLoadActive = false; this.worldLoadProgress = 0;
+=======
+>>>>>>> parent of fab54a6 (Add files via upload)
     this.perfAnnounced = false;
     this.ui = this.bindUI(); this.events(); this.setTitleSplash(); this.newWorld(Math.floor(Math.random() * 1e9), "slot1");
     if (MOBILE) { document.getElementById("touch-controls").classList.remove("hidden"); this.touch(); }
@@ -1462,13 +1468,22 @@ class Game {
   }
   bindUI() {
     const u = {
+<<<<<<< HEAD
       healthFill: document.getElementById("health-fill"), hungerFill: document.getElementById("hunger-fill"), xpFill: document.getElementById("xp-fill"), oxygenFill: document.getElementById("oxygen-fill"), healthText: document.getElementById("health-text"), hungerText: document.getElementById("hunger-text"), xpText: document.getElementById("xp-text"), oxygenText: document.getElementById("oxygen-text"), modePill: document.getElementById("mode-pill"), coords: document.getElementById("coords"), clock: document.getElementById("clock"), hotbar: document.getElementById("hotbar"), hint: document.getElementById("interaction-hint"), map: document.getElementById("minimap"), menu: document.getElementById("menu-panel"), titleSplash: document.getElementById("title-splash"), loadingPanel: document.getElementById("world-loading"), loadingPercent: document.getElementById("world-loading-percent"), loadingLabel: document.getElementById("world-loading-label"), startNewBtn: document.getElementById("start-new"), loadWorldBtn: document.getElementById("load-world"), invP: document.getElementById("inventory-panel"), craftP: document.getElementById("crafting-panel"), furP: document.getElementById("furnace-panel"), chestP: document.getElementById("chest-panel"), enchP: document.getElementById("enchant-panel"), setP: document.getElementById("settings-panel"), chatP: document.getElementById("chat-panel"), chatLog: document.getElementById("chat-log"), chatIn: document.getElementById("chat-input"), invG: document.getElementById("inventory-grid"), rec: document.getElementById("crafting-recipes"), chestG: document.getElementById("chest-grid"), enchO: document.getElementById("enchant-options"), fi: document.getElementById("furnace-input"), ff: document.getElementById("furnace-fuel"), fs: document.getElementById("furnace-start"), fst: document.getElementById("furnace-status"), rd: document.getElementById("render-distance"), pack: document.getElementById("texture-pack"), skin: document.getElementById("skin-color"), slot: document.getElementById("world-slot"), seed: document.getElementById("seed-input")
+=======
+      healthFill: document.getElementById("health-fill"), hungerFill: document.getElementById("hunger-fill"), xpFill: document.getElementById("xp-fill"), oxygenFill: document.getElementById("oxygen-fill"), healthText: document.getElementById("health-text"), hungerText: document.getElementById("hunger-text"), xpText: document.getElementById("xp-text"), oxygenText: document.getElementById("oxygen-text"), modePill: document.getElementById("mode-pill"), coords: document.getElementById("coords"), clock: document.getElementById("clock"), hotbar: document.getElementById("hotbar"), hint: document.getElementById("interaction-hint"), map: document.getElementById("minimap"), menu: document.getElementById("menu-panel"), titleSplash: document.getElementById("title-splash"), invP: document.getElementById("inventory-panel"), craftP: document.getElementById("crafting-panel"), furP: document.getElementById("furnace-panel"), chestP: document.getElementById("chest-panel"), enchP: document.getElementById("enchant-panel"), setP: document.getElementById("settings-panel"), chatP: document.getElementById("chat-panel"), chatLog: document.getElementById("chat-log"), chatIn: document.getElementById("chat-input"), invG: document.getElementById("inventory-grid"), rec: document.getElementById("crafting-recipes"), chestG: document.getElementById("chest-grid"), enchO: document.getElementById("enchant-options"), fi: document.getElementById("furnace-input"), ff: document.getElementById("furnace-fuel"), fs: document.getElementById("furnace-start"), fst: document.getElementById("furnace-status"), rd: document.getElementById("render-distance"), pack: document.getElementById("texture-pack"), skin: document.getElementById("skin-color"), slot: document.getElementById("world-slot"), seed: document.getElementById("seed-input")
+>>>>>>> parent of fab54a6 (Add files via upload)
     };
     u.hotbar.innerHTML = ""; for (let i = 0; i < 9; i++) { const s = document.createElement("div"); s.className = "slot"; s.dataset.i = i; u.hotbar.append(s); }
     u.fs.addEventListener("click", () => this.startSmelt());
     document.querySelectorAll("[data-close]").forEach((e) => e.addEventListener("click", () => { document.getElementById(e.dataset.close).classList.add("hidden"); this.lockIf(); }));
+<<<<<<< HEAD
     u.startNewBtn.addEventListener("click", () => { const t = u.seed.value.trim(), seed = t ? (Number(t) || hs(t)) : Math.floor(Math.random() * 1e9); this.startWorldTransition({ type: "new", seed, slot: u.slot.value }); });
     u.loadWorldBtn.addEventListener("click", () => { this.startWorldTransition({ type: "load", slot: u.slot.value }); });
+=======
+    document.getElementById("start-new").addEventListener("click", () => { const t = u.seed.value.trim(), seed = t ? (Number(t) || hs(t)) : Math.floor(Math.random() * 1e9); this.newWorld(seed, u.slot.value); u.menu.classList.add("hidden"); this.lock(); });
+    document.getElementById("load-world").addEventListener("click", () => { this.loadWorld(u.slot.value); u.menu.classList.add("hidden"); this.lock(); });
+>>>>>>> parent of fab54a6 (Add files via upload)
     document.getElementById("open-options")?.addEventListener("click", () => {
       this.ui.setP.classList.remove("hidden");
     });
@@ -1693,6 +1708,7 @@ class Game {
     const n = Math.hypot(l, z) || 1;
     return { x: l / n, z: z / n };
   }
+<<<<<<< HEAD
   nextFrame() { return new Promise((resolve) => requestAnimationFrame(() => resolve())); }
   setWorldLoadButtonsEnabled(enabled) {
     [this.ui?.startNewBtn, this.ui?.loadWorldBtn].forEach((b) => {
@@ -1788,6 +1804,9 @@ class Game {
     }
   }
   newWorld(seed, slot, opts = {}) {
+=======
+  newWorld(seed, slot) {
+>>>>>>> parent of fab54a6 (Add files via upload)
     if (this.world) {
       for (const k of Array.from(this.world.loaded)) this.world.dropMesh(k);
       if (this.world.atlas?.texture) this.world.atlas.texture.dispose();
@@ -1798,6 +1817,7 @@ class Game {
     this.inv = new Inventory();
     this.p.pos.set(0.5, 40, 0.5); this.p.vel.set(0, 0, 0); this.p.hp = 20; this.p.hu = 20; this.p.ox = 20; this.p.xp = 0; this.p.lv = 1; this.p.creative = 0; this.p.mount = null;
     this.time = 6000; this.achs.clear(); this.replay = []; this.replayOn = 0;
+<<<<<<< HEAD
     if (!opts.deferPrewarm) {
       this.world.updateLoaded(this.p.pos);
       this.p.pos.copy(this.findSpawn(80, 0, 0));
@@ -1805,6 +1825,11 @@ class Game {
     } else {
       this.p.pos.copy(this.findSpawn(80, 0, 0));
     }
+=======
+    this.world.updateLoaded(this.p.pos);
+    this.p.pos.copy(this.findSpawn(80, 0, 0));
+    this.world.updateLoaded(this.p.pos);
+>>>>>>> parent of fab54a6 (Add files via upload)
     this.p.fs = this.p.pos.y;
     this.rHot(); this.rInv(); this.rCraft(); this.chat(`New world started. Seed ${seed}.`); ["Tutorial: Left click to break, right click to place.", "Tutorial: E inventory, C crafting, F interact with furnace/chest/table.", "Tutorial: Switch to creative with M. Use /brush stone 3 for terrain tools.", "Tutorial: Build portal blocks and press L while inside to change dimension."].forEach((x) => this.chat(x));
     if (this.perf.low && !this.perfAnnounced) { this.chat("Performance mode enabled for low-end devices: reduced shadows/lights/effects and chunk batching."); this.perfAnnounced = true; }
